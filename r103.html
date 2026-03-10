@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FireFlux — Room 103</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#060a0f; --panel:#0a1220; --border:#1a2a3a;
+      --safe:#00ff88; --warning:#ffaa00; --danger:#ff2244;
+      --text:#c8d8e8; --dim:#4a6a8a; --accent:#0088ff;
+      --mono:'Share Tech Mono',monospace;
+      --ui:'Rajdhani',sans-serif;
+      --display:'Orbitron',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,136,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,136,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+    header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(6,10,15,0.97);border-bottom:1px solid var(--border)}
+    .hdr-l{display:flex;align-items:center;gap:14px}
+    .back{text-decoration:none;color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:6px 12px;border:1px solid var(--border);border-radius:2px;transition:all .2s}
+    .back:hover{color:var(--accent);border-color:rgba(0,136,255,0.4)}
+    .pg-title{font-family:var(--display);font-size:16px;font-weight:700;letter-spacing:3px}
+    .pg-sub{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:3px}
+    .hdr-r{display:flex;align-items:center;gap:14px}
+    .sim-badge{font-family:var(--mono);font-size:9px;letter-spacing:2px;padding:5px 12px;background:rgba(255,170,0,0.07);border:1px solid rgba(255,170,0,0.22);color:var(--warning);border-radius:2px}
+    .live-pill{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);padding:6px 14px;border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--safe);letter-spacing:2px}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:blink 1s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+    #clock{font-family:var(--mono);font-size:12px;color:var(--dim)}
+    #offline-bar{display:none;position:relative;z-index:10;padding:8px 32px;background:rgba(255,170,0,0.07);border-bottom:1px solid rgba(255,170,0,0.2);font-family:var(--mono);font-size:11px;color:var(--warning);letter-spacing:1px}
+    #risk-banner{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--border);transition:all .5s;background:rgba(0,255,136,0.06)}
+    #risk-banner.warning{background:rgba(255,170,0,0.08);animation:wpulse 2s infinite}
+    #risk-banner.danger{background:rgba(255,34,68,0.1);animation:dpulse 1s infinite}
+    @keyframes wpulse{0%,100%{background:rgba(255,170,0,0.06)}50%{background:rgba(255,170,0,0.15)}}
+    @keyframes dpulse{0%,100%{background:rgba(255,34,68,0.08)}50%{background:rgba(255,34,68,0.19)}}
+    .rb-left{display:flex;align-items:center;gap:20px}
+    .score-ring{width:72px;height:72px;border-radius:50%;border:3px solid var(--safe);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,255,136,0.04);transition:all .5s}
+    .score-ring.warning{border-color:var(--warning)}
+    .score-ring.danger{border-color:var(--danger)}
+    .score-num{font-family:var(--display);font-size:20px;font-weight:900;color:var(--safe);line-height:1;transition:color .5s}
+    .score-num.warning{color:var(--warning)}
+    .score-num.danger{color:var(--danger)}
+    .score-lbl{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-top:2px}
+    .rb-info h2{font-family:var(--display);font-size:24px;font-weight:900;letter-spacing:4px;color:var(--safe);transition:color .5s}
+    .rb-info h2.warning{color:var(--warning)}
+    .rb-info h2.danger{color:var(--danger)}
+    .rb-reason{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:5px}
+    .rb-right{text-align:right}
+    .rb-right .lbl{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:4px}
+    #last-time{font-family:var(--mono);font-size:15px;color:var(--text)}
+    .content{position:relative;z-index:1;padding:24px 32px;display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1200px;margin:0 auto}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:20px 22px}
+    .panel-title{font-family:var(--display);font-size:9px;letter-spacing:3px;color:var(--dim);margin-bottom:18px;padding-bottom:11px;border-bottom:1px solid var(--border)}
+    .full{grid-column:1/-1}
+    .sensor-item{margin-bottom:20px}
+    .sensor-item:last-child{margin-bottom:0}
+    .s-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .s-name{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px}
+    .s-val{font-family:var(--display);font-size:17px;font-weight:700;color:var(--text);transition:color .3s}
+    .bar-track{height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;margin-bottom:4px}
+    .bar-fill{height:100%;border-radius:3px;transition:width .5s,background .5s;width:0%}
+    .s-status{font-family:var(--mono);font-size:8px;color:var(--safe);letter-spacing:1px}
+    .motion-row{display:flex;align-items:center;gap:14px;padding:14px 0}
+    .m-dot{width:15px;height:15px;border-radius:50%;background:var(--dim);transition:all .3s;flex-shrink:0}
+    .m-dot.on{background:var(--warning);box-shadow:0 0 10px rgba(255,170,0,0.5)}
+    .m-text{font-family:var(--display);font-size:13px;letter-spacing:2px;color:var(--dim);transition:color .3s}
+    .info-lbl{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:10px}
+    .info-val{font-size:14px;font-weight:600;margin-bottom:3px}
+    .info-sub{font-family:var(--mono);font-size:10px;color:var(--dim)}
+    .equip{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:10px;line-height:1.8}
+    .exits-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .exit-card{padding:11px;border-radius:3px;font-family:var(--mono);font-size:10px;letter-spacing:1px;display:flex;align-items:center;gap:7px;transition:all .3s}
+    .exit-card.ok{background:rgba(0,136,255,0.07);border:1px solid rgba(0,136,255,0.2);color:var(--accent)}
+    .exit-card.bad{background:rgba(255,34,68,0.08);border:1px solid rgba(255,34,68,0.28);color:var(--danger)}
+    .ai-box{background:rgba(0,136,255,0.04);border:1px solid rgba(0,136,255,0.14);border-radius:3px;padding:16px;font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--text)}
+    .ai-pre{color:var(--accent);margin-right:8px}
+    .chart-wrap{height:200px;position:relative}
+    .tl-head{display:grid;grid-template-columns:130px 80px 100px 90px 1fr;gap:8px;padding:6px 14px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:2px;border-bottom:1px solid var(--border);margin-bottom:6px}
+    .timeline{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto}
+    .timeline::-webkit-scrollbar{width:3px}
+    .timeline::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    .tl-row{display:grid;grid-template-columns:130px 80px 100px 90px 1fr;gap:8px;align-items:center;padding:8px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:10px}
+    .tl-row.new{animation:fadeIn .4s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    .tl-time{color:var(--dim)}.tl-temp{color:#ff8844}.tl-gas{color:#44aaff}
+    .tl-lvl{padding:2px 7px;border-radius:2px;text-align:center;font-size:8px;letter-spacing:1px}
+    .tl-lvl.safe{background:rgba(0,255,136,0.09);color:var(--safe);border:1px solid rgba(0,255,136,0.18)}
+    .tl-lvl.warning{background:rgba(255,170,0,0.09);color:var(--warning);border:1px solid rgba(255,170,0,0.18)}
+    .tl-lvl.danger{background:rgba(255,34,68,0.11);color:var(--danger);border:1px solid rgba(255,34,68,0.24)}
+    .tl-reason{color:var(--dim);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-l">
+    <a href="buildingA.html" class="back">← BUILDING A</a>
+    <div>
+      <div class="pg-title">ROOM 103</div>
+      <div class="pg-sub">FLOOR 1 · BUILDING A · SIMULATED DATA</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <span class="sim-badge">⚙ SIMULATED</span>
+    <div class="live-pill"><div class="dot"></div>LIVE</div>
+    <div id="clock">--:--:--</div>
+  </div>
+</header>
+
+<div id="offline-bar">⚠ SERVER OFFLINE — Showing last known data. Check that FastAPI is running.</div>
+
+<div id="risk-banner">
+  <div class="rb-left">
+    <div class="score-ring" id="score-ring">
+      <div class="score-num" id="score-num">--</div>
+      <div class="score-lbl">RISK</div>
+    </div>
+    <div class="rb-info">
+      <h2 id="risk-lvl">LOADING…</h2>
+      <div class="rb-reason" id="risk-reason">Fetching latest data from server…</div>
+    </div>
+  </div>
+  <div class="rb-right">
+    <div class="lbl">LAST UPDATED</div>
+    <div id="last-time">--:--:--</div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="panel">
+    <div class="panel-title">📡 LIVE SENSOR READINGS</div>
+    <div class="sensor-item">
+      <div class="s-header"><span class="s-name">🌡 TEMPERATURE</span><span class="s-val" id="t-val">-- °C</span></div>
+      <div class="bar-track"><div class="bar-fill" id="t-bar"></div></div>
+      <div class="s-status">● SIMULATED</div>
+    </div>
+    <div class="sensor-item">
+      <div class="s-header"><span class="s-name">💨 GAS / SMOKE (MQ2)</span><span class="s-val" id="g-val">-- ppm</span></div>
+      <div class="bar-track"><div class="bar-fill" id="g-bar"></div></div>
+      <div class="s-status">● SIMULATED</div>
+    </div>
+    <div class="sensor-item">
+      <div class="s-header"><span class="s-name">👁 MOTION (PIR)</span></div>
+      <div class="motion-row">
+        <div class="m-dot" id="m-dot"></div>
+        <span class="m-text" id="m-text">NO MOTION</span>
+      </div>
+      <div class="s-status">● SIMULATED</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">🏢 ROOM INFORMATION</div>
+    <div style="margin-bottom:18px">
+      <div class="info-lbl">LOCATION</div>
+      <div class="info-val">Room 103 — Floor 1</div>
+      <div class="info-sub">Building A, IEM Campus, Sector V, Kolkata</div>
+      <div class="equip">🧯 Fire Extinguisher — Present<br/>🚿 Sprinkler System — Active<br/>⚙️ Data Source — Python Simulation Script</div>
+    </div>
+    <div>
+      <div class="info-lbl" style="margin-bottom:0">EXIT STATUS</div>
+      <div class="exits-grid">
+        <div class="exit-card ok" id="exit-n">🚪 NORTH EXIT</div>
+        <div class="exit-card ok">🚪 STAIRWELL A</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel full">
+    <div class="panel-title">🤖 AI SYSTEM RECOMMENDATION</div>
+    <div class="ai-box"><span class="ai-pre">SYS›</span><span id="ai-text">Initialising… waiting for sensor data.</span></div>
+  </div>
+
+  <div class="panel full">
+    <div class="panel-title">📈 SENSOR HISTORY — LAST 50 READINGS</div>
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+  </div>
+
+  <div class="panel full">
+    <div class="panel-title">🕒 READING TIMELINE — LAST 10 ENTRIES</div>
+    <div class="tl-head"><span>TIMESTAMP</span><span>TEMP</span><span>GAS</span><span>LEVEL</span><span>REASON</span></div>
+    <div class="timeline" id="tl">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--dim);padding:14px">Loading history…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── BACKEND CONFIG ── */
+const API     = "http://10.63.176.231:8000";
+const WS_URL  = "ws://10.63.176.231:8000";
+const ROOM_ID = 3;
+
+setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+
+const chart = new Chart(document.getElementById('chart').getContext('2d'), {
+  type:'line',
+  data:{ labels:[], datasets:[
+    { label:'Temperature (°C)', data:[], borderColor:'#ff8844', backgroundColor:'rgba(255,136,68,0.06)', borderWidth:2, pointRadius:2, tension:0.4, fill:true, yAxisID:'y' },
+    { label:'Gas (ppm)',        data:[], borderColor:'#44aaff', backgroundColor:'rgba(68,170,255,0.06)', borderWidth:2, pointRadius:2, tension:0.4, fill:true, yAxisID:'y1' }
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false, animation:{duration:250},
+    plugins:{ legend:{ labels:{ color:'#4a6a8a', font:{ family:'Share Tech Mono', size:10 } } } },
+    scales:{
+      x:  { ticks:{ color:'#4a6a8a', font:{ family:'Share Tech Mono', size:9 }, maxTicksLimit:8 }, grid:{ color:'rgba(26,42,58,0.9)' } },
+      y:  { position:'left',  ticks:{ color:'#ff8844', font:{ family:'Share Tech Mono', size:9 } }, grid:{ color:'rgba(26,42,58,0.9)' } },
+      y1: { position:'right', ticks:{ color:'#44aaff', font:{ family:'Share Tech Mono', size:9 } }, grid:{ drawOnChartArea:false } }
+    }
+  }
+});
+
+function pushChart(temp, gas){
+  chart.data.labels.push(new Date().toLocaleTimeString());
+  chart.data.datasets[0].data.push(temp);
+  chart.data.datasets[1].data.push(gas);
+  if(chart.data.labels.length > 50){ chart.data.labels.shift(); chart.data.datasets[0].data.shift(); chart.data.datasets[1].data.shift(); }
+  chart.update();
+}
+
+function updateUI(d){
+  const lvl  = d.risk_level || 'safe';
+  const temp = parseFloat(d.temperature);
+  const gas  = parseFloat(d.gas_value);
+
+  document.getElementById('risk-banner').className = lvl;
+  document.getElementById('score-ring').className  = `score-ring ${lvl}`;
+  document.getElementById('score-num').className   = `score-num ${lvl}`;
+  document.getElementById('score-num').textContent = parseFloat(d.risk_score||0).toFixed(1);
+  document.getElementById('risk-lvl').className    = lvl;
+  document.getElementById('risk-lvl').textContent  = lvl.toUpperCase();
+  document.getElementById('risk-reason').textContent = d.reason || 'All readings normal';
+  document.getElementById('last-time').textContent = new Date(d.timestamp||Date.now()).toLocaleTimeString();
+  document.getElementById('offline-bar').style.display = 'none';
+
+  document.getElementById('t-val').textContent = `${temp.toFixed(1)} °C`;
+  const tb = document.getElementById('t-bar');
+  tb.style.width = Math.min((temp/120)*100,100)+'%';
+  tb.style.background = temp>=78?'var(--danger)':temp>=57?'var(--warning)':'var(--safe)';
+
+  document.getElementById('g-val').textContent = `${gas.toFixed(0)} ppm`;
+  const gb = document.getElementById('g-bar');
+  gb.style.width = Math.min((gas/2500)*100,100)+'%';
+  gb.style.background = gas>=2000?'var(--danger)':gas>=1000?'var(--warning)':'var(--safe)';
+
+  if(d.motion){ document.getElementById('m-dot').className='m-dot on'; document.getElementById('m-text').textContent='MOTION DETECTED'; document.getElementById('m-text').style.color='var(--warning)'; }
+  else{ document.getElementById('m-dot').className='m-dot'; document.getElementById('m-text').textContent='NO MOTION'; document.getElementById('m-text').style.color='var(--dim)'; }
+
+  const en = document.getElementById('exit-n');
+  if(lvl==='danger'){ en.className='exit-card bad'; en.textContent='🚫 NORTH EXIT — UNSAFE'; }
+  else{ en.className='exit-card ok'; en.textContent='🚪 NORTH EXIT'; }
+
+  document.getElementById('ai-text').textContent = lvl==='danger'
+    ? `🚨 CRITICAL: ${d.reason}. Evacuate Room 103 immediately. Use Stairwell A only.`
+    : lvl==='warning'
+    ? `⚠️ WARNING: ${d.reason}. Elevated readings detected in Room 103. Monitor closely.`
+    : `✅ All clear. Temperature ${temp.toFixed(1)}°C and gas ${gas.toFixed(0)} ppm within safe limits.`;
+}
+
+function showOffline(){
+  document.getElementById('offline-bar').style.display = 'block';
+  document.getElementById('risk-lvl').textContent   = 'OFFLINE';
+  document.getElementById('risk-reason').textContent = 'Cannot reach FastAPI server';
+  document.getElementById('ai-text').textContent     = 'Server unavailable.';
+}
+
+function makeRow(ts, temp, gas, lvl, reason, isNew=false){
+  const el = document.createElement('div');
+  el.className = `tl-row${isNew?' new':''}`;
+  el.innerHTML = `<span class="tl-time">${new Date(ts).toLocaleTimeString()}</span><span class="tl-temp">${parseFloat(temp).toFixed(1)} °C</span><span class="tl-gas">${parseFloat(gas).toFixed(0)} ppm</span><span class="tl-lvl ${lvl}">${lvl.toUpperCase()}</span><span class="tl-reason">${reason||'All normal'}</span>`;
+  return el;
+}
+
+function prependRow(ts, temp, gas, lvl, reason){
+  const tl = document.getElementById('tl');
+  const ph = tl.querySelector(':not(.tl-row)');
+  if(ph) ph.remove();
+  tl.insertBefore(makeRow(ts,temp,gas,lvl,reason,true), tl.firstChild);
+  while(tl.children.length > 10) tl.removeChild(tl.lastChild);
+}
+
+async function fetchLatest(){
+  try{
+    const r = await fetch(`${API}/rooms/${ROOM_ID}/latest`);
+    if(!r.ok) throw '';
+    const d = await r.json();
+    if(d.error){ showOffline(); return; }
+    updateUI(d);
+  }catch(_){ showOffline(); }
+}
+
+async function fetchHistory(){
+  try{
+    const r = await fetch(`${API}/rooms/${ROOM_ID}/history?limit=50`);
+    if(!r.ok) throw '';
+    const rows = await r.json();
+    if(!rows.length) return;
+    chart.data.labels=[]; chart.data.datasets[0].data=[]; chart.data.datasets[1].data=[];
+    [...rows].reverse().forEach(row=>{ chart.data.labels.push(new Date(row.timestamp).toLocaleTimeString()); chart.data.datasets[0].data.push(row.temperature); chart.data.datasets[1].data.push(row.gas_value); });
+    chart.update();
+    const tl = document.getElementById('tl');
+    tl.innerHTML = '';
+    if(!rows.length){ tl.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--dim);padding:14px">No history yet.</div>'; return; }
+    rows.slice(0,10).forEach(row=>tl.appendChild(makeRow(row.timestamp,row.temperature,row.gas_value,row.risk_level||'safe',row.reason)));
+  }catch(_){
+    document.getElementById('tl').innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--dim);padding:14px">Could not load history.</div>';
+  }
+}
+
+function openWS(){
+  const ws = new WebSocket(`${WS_URL}/ws/${ROOM_ID}`);
+  ws.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if(d.room_id !== ROOM_ID) return;
+    updateUI(d);
+    pushChart(d.temperature, d.gas_value);
+    prependRow(new Date().toISOString(), d.temperature, d.gas_value, d.risk_level, d.reason);
+  };
+  ws.onclose = () => setTimeout(openWS, 3000);
+}
+
+fetchLatest(); fetchHistory(); openWS();
+</script>
+</body>
+</html>

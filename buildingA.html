@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FireFlux — Building A</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#060a0f; --panel:#0a1220; --border:#1a2a3a;
+      --safe:#00ff88; --warning:#ffaa00; --danger:#ff2244;
+      --text:#c8d8e8; --dim:#4a6a8a; --accent:#0088ff;
+      --mono:'Share Tech Mono',monospace;
+      --ui:'Rajdhani',sans-serif;
+      --display:'Orbitron',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,136,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,136,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+    /* HEADER */
+    header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(6,10,15,0.97);border-bottom:1px solid var(--border)}
+    .hdr-l{display:flex;align-items:center;gap:14px}
+    .back{text-decoration:none;color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:6px 12px;border:1px solid var(--border);border-radius:2px;transition:all .2s}
+    .back:hover{color:var(--accent);border-color:rgba(0,136,255,0.4)}
+    .pg-title{font-family:var(--display);font-size:16px;font-weight:700;letter-spacing:3px}
+    .pg-sub{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:3px}
+    .live-pill{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);padding:6px 14px;border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--safe);letter-spacing:2px}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:blink 1s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+
+    /* BANNER */
+    #banner{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 32px;border-bottom:1px solid var(--border);font-weight:600;letter-spacing:1px;font-size:14px;transition:all .4s}
+    #banner.safe{background:rgba(0,255,136,0.07);color:var(--safe)}
+    #banner.warning{background:rgba(255,170,0,0.09);color:var(--warning);animation:wpulse 2s infinite}
+    #banner.danger{background:rgba(255,34,68,0.11);color:var(--danger);animation:dpulse 1s infinite}
+    @keyframes wpulse{0%,100%{background:rgba(255,170,0,0.07)}50%{background:rgba(255,170,0,0.16)}}
+    @keyframes dpulse{0%,100%{background:rgba(255,34,68,0.09)}50%{background:rgba(255,34,68,0.2)}}
+    .b-badge{font-family:var(--display);font-size:10px;letter-spacing:3px}
+
+    /* CONTENT */
+    .content{position:relative;z-index:1;padding:28px 32px;max-width:1200px;margin:0 auto}
+    .floor-sec{margin-bottom:28px}
+    .floor-lbl{font-family:var(--display);font-size:10px;letter-spacing:3px;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+    .floor-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+    .floor-plan{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:18px 22px}
+
+    /* EXITS */
+    .exits-row{display:flex;align-items:center;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+    .exits-lbl{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px}
+    .exit-tag{font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:4px 10px;border-radius:2px;transition:all .3s}
+    .exit-tag.ok{background:rgba(0,136,255,0.08);border:1px solid rgba(0,136,255,0.25);color:var(--accent)}
+    .exit-tag.bad{background:rgba(255,34,68,0.09);border:1px solid rgba(255,34,68,0.3);color:var(--danger)}
+
+    /* ROOMS GRID */
+    .rooms-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+    .room{border-radius:3px;padding:12px 8px;transition:all .3s;text-align:center;min-height:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+    .room.safe{background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.14)}
+    .room.warning{background:rgba(255,170,0,0.06);border:1px solid rgba(255,170,0,0.3)}
+    .room.danger{background:rgba(255,34,68,0.08);border:1px solid rgba(255,34,68,0.4);animation:rdng 1s infinite}
+    @keyframes rdng{0%,100%{box-shadow:none}50%{box-shadow:0 0 14px rgba(255,34,68,0.35)}}
+    .room.clickable{cursor:pointer}
+    .room.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.5)}
+    .room-num{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:1px}
+    .room.safe .room-num{color:var(--safe)}
+    .room.warning .room-num{color:var(--warning)}
+    .room.danger .room-num{color:var(--danger)}
+    .room-st{font-family:var(--mono);font-size:8px;letter-spacing:1px}
+    .room.safe .room-st{color:var(--safe)}
+    .room.warning .room-st{color:var(--warning)}
+    .room.danger .room-st{color:var(--danger)}
+    .room-ico{font-size:14px;margin-bottom:2px}
+
+    .corridor{height:22px;margin:10px 0;background:rgba(0,136,255,0.03);border:1px solid rgba(0,136,255,0.07);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:3px}
+    .ext-row{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);margin-top:8px}
+    .ext-item{font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;align-items:center;gap:4px}
+
+    /* MAP LINK */
+    .map-bar{margin-top:22px;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+    .map-bar h3{font-family:var(--display);font-size:12px;letter-spacing:2px;margin-bottom:4px}
+    .map-bar p{font-family:var(--mono);font-size:10px;color:var(--dim)}
+    .map-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(0,136,255,0.1);border:1px solid rgba(0,136,255,0.28);color:var(--accent);text-decoration:none;font-family:var(--display);font-size:9px;letter-spacing:2px;border-radius:2px;transition:background .2s}
+    .map-btn:hover{background:rgba(0,136,255,0.2)}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-l">
+    <a href="index.html" class="back">← BACK</a>
+    <div>
+      <div class="pg-title">BUILDING A</div>
+      <div class="pg-sub">IEM CAMPUS — SECTOR V, KOLKATA</div>
+    </div>
+  </div>
+  <div class="live-pill"><div class="dot"></div>LIVE</div>
+</header>
+
+<div id="banner" class="safe">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="b-icon">✅</span>
+    <span id="b-text">Building A — All rooms operational, no threats detected</span>
+  </div>
+  <span class="b-badge" id="b-badge">ALL SAFE</span>
+</div>
+
+<div class="content">
+
+  <!-- FLOOR 1 -->
+  <div class="floor-sec">
+    <div class="floor-lbl">FLOOR 1</div>
+    <div class="floor-plan">
+      <div class="exits-row">
+        <span class="exits-lbl">EXITS:</span>
+        <span class="exit-tag ok" id="exit-n1">🚪 NORTH EXIT</span>
+        <span class="exit-tag ok">🚪 STAIRWELL A</span>
+      </div>
+      <div class="rooms-grid">
+        <div class="room safe clickable" id="room-101" onclick="location.href='r101.html'">
+          <div class="room-ico">🟢</div><div class="room-num">101</div><div class="room-st" id="st-101">LOADING…</div>
+        </div>
+        <div class="room safe clickable" id="room-102" onclick="location.href='r102.html'">
+          <div class="room-ico">🟢</div><div class="room-num">102</div><div class="room-st" id="st-102">LOADING…</div>
+        </div>
+        <div class="room safe clickable" id="room-103" onclick="location.href='r103.html'">
+          <div class="room-ico">🟢</div><div class="room-num">103</div><div class="room-st" id="st-103">LOADING…</div>
+        </div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">104</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">105</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">106</div><div class="room-st">SAFE</div></div>
+      </div>
+      <div class="corridor">— CORRIDOR —</div>
+      <div class="ext-row">
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOOR 2 -->
+  <div class="floor-sec">
+    <div class="floor-lbl">FLOOR 2</div>
+    <div class="floor-plan">
+      <div class="exits-row">
+        <span class="exits-lbl">EXITS:</span>
+        <span class="exit-tag ok">🚪 NORTH EXIT</span>
+        <span class="exit-tag ok">🚪 STAIRWELL B</span>
+      </div>
+      <div class="rooms-grid">
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">201</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">202</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">203</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">204</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">205</div><div class="room-st">SAFE</div></div>
+        <div class="room safe"><div class="room-ico">🟢</div><div class="room-num">206</div><div class="room-st">SAFE</div></div>
+      </div>
+      <div class="corridor">— CORRIDOR —</div>
+      <div class="ext-row">
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-bar">
+    <div>
+      <h3>🚒 FIRE BRIGADE NAVIGATION</h3>
+      <p>IEM Campus, GN-34/2, Sector V, Bidhannagar, Kolkata — 700091</p>
+    </div>
+    <a href="https://www.google.com/maps/search/IEM+College+Sector+V+Kolkata" target="_blank" class="map-btn">📍 OPEN IN GOOGLE MAPS</a>
+  </div>
+</div>
+
+<script>
+/* ── BACKEND CONFIG ── */
+const API = "http://10.63.176.231:8000";
+const WS  = "ws://10.63.176.231:8000";
+
+const ICONS = { safe:'🟢', warning:'🟡', danger:'🔴' };
+const ID_MAP = { 1:101, 2:102, 3:103 };   // room_id → room number
+const roomLvl = { 1:'safe', 2:'safe', 3:'safe' };
+
+function setRoom(roomId, lvl){
+  const num = ID_MAP[roomId];
+  const el  = document.getElementById(`room-${num}`);
+  const st  = document.getElementById(`st-${num}`);
+  if(!el) return;
+  el.className = `room ${lvl} clickable`;
+  st.textContent = lvl.toUpperCase();
+  el.querySelector('.room-ico').textContent = ICONS[lvl];
+}
+
+function worst(){ const v=Object.values(roomLvl); return v.includes('danger')?'danger':v.includes('warning')?'warning':'safe'; }
+
+function setBanner(lvl, reason){
+  document.getElementById('banner').className = lvl;
+  document.getElementById('b-icon').textContent  = lvl==='safe'?'✅':lvl==='warning'?'⚠️':'🚨';
+  document.getElementById('b-text').textContent  = lvl==='safe'?'Building A — All rooms operational, no threats detected':lvl==='warning'?`WARNING — ${reason}`:`DANGER — ${reason} — Evacuate immediately`;
+  document.getElementById('b-badge').textContent = lvl==='safe'?'ALL SAFE':lvl.toUpperCase();
+  const en = document.getElementById('exit-n1');
+  if(lvl==='danger'){ en.className='exit-tag bad'; en.textContent='🚫 NORTH EXIT — UNSAFE'; }
+  else{ en.className='exit-tag ok'; en.textContent='🚪 NORTH EXIT'; }
+}
+
+/* WebSocket per room */
+function openWS(roomId){
+  const ws = new WebSocket(`${WS}/ws/${roomId}`);
+  ws.onmessage = e => {
+    const d = JSON.parse(e.data);
+    roomLvl[roomId] = d.risk_level;
+    setRoom(roomId, d.risk_level);
+    setBanner(worst(), d.reason);
+  };
+  ws.onclose = () => setTimeout(()=>openWS(roomId), 3000);
+}
+
+/* Initial REST load */
+async function fetchAll(){
+  for(const id of [1,2,3]){
+    try{
+      const r = await fetch(`${API}/rooms/${id}/latest`);
+      if(!r.ok) throw '';
+      const d = await r.json();
+      if(d.error){ document.getElementById(`st-${ID_MAP[id]}`).textContent='NO DATA'; continue; }
+      roomLvl[id] = d.risk_level;
+      setRoom(id, d.risk_level);
+    }catch(_){
+      document.getElementById(`st-${ID_MAP[id]}`).textContent='OFFLINE';
+    }
+  }
+  setBanner(worst(),'');
+}
+
+fetchAll();
+openWS(1); openWS(2); openWS(3);
+</script>
+</body>
+</html>
