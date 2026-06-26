@@ -18,7 +18,8 @@
       --display:'Orbitron',monospace;
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--text);font-family:var(--ui);}
     body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,136,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,136,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 
     /* HEADER */
@@ -46,9 +47,27 @@
     #banner.warning .banner-badge{background:rgba(255,170,0,0.12);border:1px solid rgba(255,170,0,0.3)}
     #banner.danger .banner-badge{background:rgba(255,34,68,0.18);border:1px solid rgba(255,34,68,0.4)}
 
-    /* DESKTOP LAYOUT */
-    .main{position:relative;z-index:1;display:grid;grid-template-columns:1fr 390px;height:calc(100vh - 108px);overflow:hidden}
+    /* ── DESKTOP LAYOUT: side by side ── */
+    .page-body{
+      position:relative;z-index:1;
+      display:grid;
+      grid-template-columns:1fr 390px;
+      height:calc(100vh - 108px);
+      overflow:hidden;
+    }
     #map{width:100%;height:100%}
+
+    /* SIDEBAR — desktop */
+    .sidebar{
+      background:var(--panel);
+      border-left:1px solid var(--border);
+      display:flex;flex-direction:column;gap:10px;
+      padding:18px;overflow-y:auto;
+    }
+    .sidebar::-webkit-scrollbar{width:3px}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+    /* Leaflet */
     .leaflet-container{background:#080d12 !important}
     .leaflet-popup-content-wrapper{background:#0a1220 !important;border:1px solid #1a2a3a !important;border-radius:4px !important;box-shadow:0 8px 32px rgba(0,0,0,.7) !important;color:#c8d8e8 !important}
     .leaflet-popup-tip{background:#0a1220 !important}
@@ -59,19 +78,16 @@
     .popup-btn:hover{background:rgba(0,136,255,0.26)}
     .popup-btn.disabled{opacity:.35;pointer-events:none}
 
-    /* SIDEBAR */
-    .sidebar{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;gap:10px;padding:18px;overflow-y:auto}
-    .sidebar::-webkit-scrollbar{width:3px}
-    .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    /* SECTION LABEL */
     .sec-label{font-family:var(--display);font-size:9px;letter-spacing:3px;color:var(--dim);padding-bottom:10px;border-bottom:1px solid var(--border)}
 
     /* BUILDING CARDS */
-    .bcard{position:relative;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:3px;padding:12px 14px;cursor:pointer;transition:all .2s;padding-left:18px}
+    .bcard{position:relative;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:3px;padding:12px 14px 12px 18px;cursor:pointer;transition:all .2s}
     .bcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;transition:background .3s}
     .bcard.safe::before{background:var(--safe)}
     .bcard.warning::before{background:var(--warning)}
     .bcard.danger::before{background:var(--danger)}
-    .bcard:hover{background:rgba(0,136,255,0.05);border-color:rgba(0,136,255,0.25);transform:translateX(2px)}
+    .bcard:hover{background:rgba(0,136,255,0.05);border-color:rgba(0,136,255,0.25)}
     .bcard.active{background:rgba(0,136,255,0.07);border-color:rgba(0,136,255,0.35)}
     .bcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
     .bcard-name{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:1px}
@@ -85,7 +101,7 @@
 
     /* SIMULATOR */
     .sim-wrap{background:rgba(0,136,255,0.04);border:1px solid rgba(0,136,255,0.18);border-radius:4px;padding:16px}
-    .sim-head{font-family:var(--display);font-size:10px;letter-spacing:3px;color:var(--accent);display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(0,136,255,0.12);margin-bottom:14px;flex-wrap:wrap}
+    .sim-head{font-family:var(--display);font-size:10px;letter-spacing:3px;color:var(--accent);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid rgba(0,136,255,0.12);margin-bottom:14px}
     .sim-tag{font-size:8px;padding:2px 7px;background:rgba(0,136,255,0.14);border:1px solid rgba(0,136,255,0.3);border-radius:2px;color:var(--accent)}
     .sim-row{margin-bottom:13px}
     .sim-lbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:6px}
@@ -116,86 +132,55 @@
     .sbtn-reset{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.22);color:var(--safe)}
     .sbtn-reset:hover{background:rgba(0,255,136,0.13)}
 
-    /* TAB BAR — mobile only, hidden on desktop */
-    .tab-bar{display:none}
-
-    /* ── MOBILE ── */
+    /* ══════════════════════════════
+       MOBILE  ≤ 768px
+       Map on top, controls below, always visible, page scrolls
+    ══════════════════════════════ */
     @media(max-width:768px){
+
       /* header */
       header{padding:10px 14px}
-      .logo h1{font-size:16px;letter-spacing:2px}
+      .logo h1{font-size:17px;letter-spacing:2px}
       .logo-sub{display:none}
       .logo-flame{width:28px;height:28px;font-size:13px}
       #clock{display:none}
-      .live-pill{padding:5px 10px;font-size:10px}
+      .live-pill{padding:5px 10px;font-size:10px;letter-spacing:1px}
 
       /* banner */
       #banner{padding:10px 14px;font-size:12px}
 
-      /* main — stack vertically, scroll freely */
-      .main{
+      /* switch layout to vertical, allow page to scroll */
+      .page-body{
         display:flex;
         flex-direction:column;
         height:auto;
         overflow:visible;
       }
 
-      /* MAP — full width, fixed height on mobile */
+      /* MAP — 55% of viewport height, always on top */
       #map{
         width:100%;
-        height:260px;
+        height:55vw;
+        min-height:220px;
+        max-height:320px;
         flex-shrink:0;
       }
 
-      /* SIDEBAR — full width below map */
+      /* SIDEBAR — full width below map, no scroll trap */
       .sidebar{
         border-left:none;
         border-top:1px solid var(--border);
         width:100%;
         padding:14px;
         overflow-y:visible;
+        height:auto;
+        gap:12px;
       }
 
-      /* Tab switching system */
-      .tab-bar{
-        display:flex;
-        background:var(--panel);
-        border-bottom:1px solid var(--border);
-        position:sticky;
-        top:0;
-        z-index:20;
-      }
-      .tab-btn{
-        flex:1;
-        padding:10px;
-        font-family:var(--display);
-        font-size:9px;
-        letter-spacing:2px;
-        color:var(--dim);
-        background:transparent;
-        border:none;
-        border-bottom:2px solid transparent;
-        cursor:pointer;
-        transition:all .2s;
-      }
-      .tab-btn.active{
-        color:var(--accent);
-        border-bottom-color:var(--accent);
-        background:rgba(0,136,255,0.06);
-      }
-
-      /* hide/show panels via tabs */
-      #map-panel{display:block}
-      #sidebar-panel{display:none}
-      #map-panel.active{display:block}
-      #sidebar-panel.active{display:block}
-
-      .sim-btns{grid-template-columns:1fr 1fr}
       .bcard:hover{transform:none}
     }
 
     @media(max-width:400px){
-      .logo h1{font-size:14px}
       .sim-btns{grid-template-columns:1fr}
     }
   </style>
@@ -217,7 +202,7 @@
     </div>
   </div>
   <div class="hdr-right">
-    <div class="live-pill"><div class="dot"></div>LIVE</div>
+    <div class="live-pill"><div class="dot"></div>LIVE MONITORING</div>
     <div id="clock">--:--:--</div>
   </div>
 </header>
@@ -230,92 +215,62 @@
   <span class="banner-badge" id="b-badge">ALL SAFE</span>
 </div>
 
-<!-- TAB BAR (mobile only) -->
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('map')">🗺 MAP</button>
-  <button class="tab-btn" onclick="switchTab('sidebar')">📡 CONTROLS</button>
-</div>
+<!-- ONE container: map left/top, sidebar right/below -->
+<div class="page-body">
 
-<div class="main">
-  <!-- MAP PANEL -->
-  <div id="map-panel" class="active">
-    <div id="map"></div>
-  </div>
+  <div id="map"></div>
 
-  <!-- SIDEBAR PANEL -->
-  <div id="sidebar-panel">
-    <div class="sidebar">
+  <div class="sidebar">
 
-      <div class="sim-wrap">
-        <div class="sim-head">🔬 LAB 101 SIMULATOR <span class="sim-tag">BLDG A · ROOM 1</span></div>
-        <div class="sim-row">
-          <div class="sim-lbl">🌡 TEMPERATURE <span id="td">28 °C</span></div>
-          <input type="range" id="t-slider" min="20" max="150" value="28" oninput="sVal('t',this.value)"/>
-        </div>
-        <div class="sim-row">
-          <div class="sim-lbl">💨 GAS / SMOKE <span id="gd">400 ppm</span></div>
-          <input type="range" id="g-slider" min="100" max="3000" value="400" oninput="sVal('g',this.value)"/>
-        </div>
-        <div class="sim-row">
-          <div class="sim-lbl">👁 MOTION DETECTION</div>
-          <div class="toggle-row">
-            <label class="tgl">
-              <input type="checkbox" id="m-chk" onchange="mLbl()"/>
-              <div class="tgl-track"></div><div class="tgl-thumb"></div>
-            </label>
-            <span class="tgl-lbl">Status: <em id="md">NO MOTION</em></span>
-          </div>
-        </div>
-        <div class="sim-result" id="sim-res"></div>
-        <div class="sim-btns">
-          <button class="sbtn sbtn-send" id="s-btn" onclick="sendSim()">▶ SEND READING</button>
-          <button class="sbtn sbtn-reset" onclick="resetSim()">↺ RESET SAFE</button>
+    <div class="sim-wrap">
+      <div class="sim-head">🔬 LAB 101 SIMULATOR <span class="sim-tag">BLDG A · ROOM 1</span></div>
+      <div class="sim-row">
+        <div class="sim-lbl">🌡 TEMPERATURE <span id="td">28 °C</span></div>
+        <input type="range" id="t-slider" min="20" max="150" value="28" oninput="sVal('t',this.value)"/>
+      </div>
+      <div class="sim-row">
+        <div class="sim-lbl">💨 GAS / SMOKE <span id="gd">400 ppm</span></div>
+        <input type="range" id="g-slider" min="100" max="3000" value="400" oninput="sVal('g',this.value)"/>
+      </div>
+      <div class="sim-row">
+        <div class="sim-lbl">👁 MOTION DETECTION</div>
+        <div class="toggle-row">
+          <label class="tgl">
+            <input type="checkbox" id="m-chk" onchange="mLbl()"/>
+            <div class="tgl-track"></div><div class="tgl-thumb"></div>
+          </label>
+          <span class="tgl-lbl">Status: <em id="md">NO MOTION</em></span>
         </div>
       </div>
-
-      <div class="sec-label">MONITORED BUILDINGS</div>
-
-      <div class="bcard safe active" id="cA" onclick="switchToMap('A')">
-        <div class="bcard-top"><span class="bcard-name">BUILDING A</span><span class="badge" id="bA-badge">SAFE</span></div>
-        <div class="bcard-addr">IEM Campus, Sector V</div>
-        <div class="bcard-chips"><span class="chip">3 SENSORS</span><span class="chip" style="color:var(--safe);border-color:rgba(0,255,136,0.3)">LIVE</span></div>
+      <div class="sim-result" id="sim-res"></div>
+      <div class="sim-btns">
+        <button class="sbtn sbtn-send" id="s-btn" onclick="sendSim()">▶ SEND READING</button>
+        <button class="sbtn sbtn-reset" onclick="resetSim()">↺ RESET SAFE</button>
       </div>
-      <div class="bcard safe" onclick="switchToMap('B')"><div class="bcard-top"><span class="bcard-name">BUILDING B</span><span class="badge">SAFE</span></div><div class="bcard-addr">Technopolis, BP Block</div><div class="bcard-chips"><span class="chip">12 SENSORS</span></div></div>
-      <div class="bcard safe" onclick="switchToMap('C')"><div class="bcard-top"><span class="bcard-name">BUILDING C</span><span class="badge">SAFE</span></div><div class="bcard-addr">IBM BCS, EP Block</div><div class="bcard-chips"><span class="chip">8 SENSORS</span></div></div>
-      <div class="bcard safe" onclick="switchToMap('D')"><div class="bcard-top"><span class="bcard-name">BUILDING D</span><span class="badge">SAFE</span></div><div class="bcard-addr">Primarc Tower, DN Block</div><div class="bcard-chips"><span class="chip">6 SENSORS</span></div></div>
-      <div class="bcard safe" onclick="switchToMap('E')"><div class="bcard-top"><span class="bcard-name">BUILDING E</span><span class="badge">SAFE</span></div><div class="bcard-addr">Webel Bhavan, Sector V</div><div class="bcard-chips"><span class="chip">5 SENSORS</span></div></div>
-      <div class="bcard safe" onclick="switchToMap('F')"><div class="bcard-top"><span class="bcard-name">BUILDING F</span><span class="badge">SAFE</span></div><div class="bcard-addr">Wipro Campus, Sector V</div><div class="bcard-chips"><span class="chip">9 SENSORS</span></div></div>
-
     </div>
+
+    <div class="sec-label">MONITORED BUILDINGS</div>
+
+    <div class="bcard safe active" id="cA" onclick="focusMap('A')">
+      <div class="bcard-top"><span class="bcard-name">BUILDING A</span><span class="badge" id="bA-badge">SAFE</span></div>
+      <div class="bcard-addr">IEM Campus, Sector V</div>
+      <div class="bcard-chips"><span class="chip">3 SENSORS</span><span class="chip" style="color:var(--safe);border-color:rgba(0,255,136,0.3)">LIVE</span></div>
+    </div>
+    <div class="bcard safe" onclick="focusMap('B')"><div class="bcard-top"><span class="bcard-name">BUILDING B</span><span class="badge">SAFE</span></div><div class="bcard-addr">Technopolis, BP Block</div><div class="bcard-chips"><span class="chip">12 SENSORS</span></div></div>
+    <div class="bcard safe" onclick="focusMap('C')"><div class="bcard-top"><span class="bcard-name">BUILDING C</span><span class="badge">SAFE</span></div><div class="bcard-addr">IBM BCS, EP Block</div><div class="bcard-chips"><span class="chip">8 SENSORS</span></div></div>
+    <div class="bcard safe" onclick="focusMap('D')"><div class="bcard-top"><span class="bcard-name">BUILDING D</span><span class="badge">SAFE</span></div><div class="bcard-addr">Primarc Tower, DN Block</div><div class="bcard-chips"><span class="chip">6 SENSORS</span></div></div>
+    <div class="bcard safe" onclick="focusMap('E')"><div class="bcard-top"><span class="bcard-name">BUILDING E</span><span class="badge">SAFE</span></div><div class="bcard-addr">Webel Bhavan, Sector V</div><div class="bcard-chips"><span class="chip">5 SENSORS</span></div></div>
+    <div class="bcard safe" onclick="focusMap('F')"><div class="bcard-top"><span class="bcard-name">BUILDING F</span><span class="badge">SAFE</span></div><div class="bcard-addr">Wipro Campus, Sector V</div><div class="bcard-chips"><span class="chip">9 SENSORS</span></div></div>
+
   </div>
 </div>
 
 <script>
-/* ── BACKEND ── */
 const API = "https://fireflux-1.onrender.com";
 const WS  = "wss://fireflux-1.onrender.com";
 
-/* ── CLOCK ── */
 setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
 
-/* ── TAB SWITCHER (mobile) ── */
-function switchTab(tab) {
-  const isMobile = window.innerWidth <= 768;
-  document.getElementById('map-panel').classList.toggle('active', tab === 'map');
-  document.getElementById('sidebar-panel').classList.toggle('active', tab === 'sidebar');
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', (i===0 && tab==='map') || (i===1 && tab==='sidebar'));
-  });
-  if (tab === 'map') setTimeout(() => map.invalidateSize(), 100);
-}
-
-/* Switch to map tab and focus building (for mobile building card clicks) */
-function switchToMap(k) {
-  if (window.innerWidth <= 768) switchTab('map');
-  focusMap(k);
-}
-
-/* ── MAP ── */
 const BLDGS = {
   A:{ lat:22.5701, lng:88.4297, addr:'IEM Campus, Sector V',    url:'buildinga.html', live:true  },
   B:{ lat:22.5797, lng:88.4377, addr:'Technopolis, BP Block',   url:null,             live:false },
@@ -326,7 +281,7 @@ const BLDGS = {
 };
 
 const map = L.map('map',{center:[22.574,88.433],zoom:15});
-setTimeout(()=>map.invalidateSize(),300);
+setTimeout(()=>map.invalidateSize(),400);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©OpenStreetMap ©CARTO',maxZoom:19}).addTo(map);
 
 const MARKERS = {};
@@ -343,9 +298,13 @@ Object.entries(BLDGS).forEach(([k,b])=>{
   MARKERS[k] = m;
 });
 
-function focusMap(k){ map.setView([BLDGS[k].lat,BLDGS[k].lng],17,{animate:true}); MARKERS[k].openPopup(); }
+function focusMap(k){
+  map.setView([BLDGS[k].lat,BLDGS[k].lng],17,{animate:true});
+  MARKERS[k].openPopup();
+  // on mobile scroll back to top so user sees the map
+  if(window.innerWidth<=768) window.scrollTo({top:0,behavior:'smooth'});
+}
 
-/* ── RISK STATE ── */
 const roomLvl = {1:'safe',2:'safe',3:'safe'};
 function worst(){ const v=Object.values(roomLvl); return v.includes('danger')?'danger':v.includes('warning')?'warning':'safe'; }
 
@@ -365,7 +324,6 @@ function setBanner(lvl, reason){
   MARKERS['A'].setIcon(mkIcon(lvl));
 }
 
-/* ── WEBSOCKET ── */
 function openWS(roomId){
   const ws = new WebSocket(`${WS}/ws/${roomId}`);
   ws.onmessage = e => {
@@ -376,7 +334,6 @@ function openWS(roomId){
   ws.onclose = () => setTimeout(()=>openWS(roomId), 3000);
 }
 
-/* ── INITIAL FETCH ── */
 async function fetchLatest(){
   for(const id of [1,2,3]){
     try{
@@ -390,41 +347,39 @@ async function fetchLatest(){
   setBanner(worst(),'');
 }
 
-/* ── SIMULATOR ── */
-function sVal(t,v){ t==='t' ? (document.getElementById('td').textContent=`${v} °C`) : (document.getElementById('gd').textContent=`${v} ppm`); }
+function sVal(t,v){ t==='t'?(document.getElementById('td').textContent=`${v} °C`):(document.getElementById('gd').textContent=`${v} ppm`); }
 function mLbl(){ document.getElementById('md').textContent = document.getElementById('m-chk').checked?'DETECTED':'NO MOTION'; }
 
 async function sendSim(){
-  const temp   = parseFloat(document.getElementById('t-slider').value);
-  const gas    = parseFloat(document.getElementById('g-slider').value);
-  const motion = document.getElementById('m-chk').checked;
-  const btn    = document.getElementById('s-btn');
-  btn.disabled = true; btn.textContent = 'SENDING...';
-  const res = document.getElementById('sim-res');
+  const temp=parseFloat(document.getElementById('t-slider').value);
+  const gas=parseFloat(document.getElementById('g-slider').value);
+  const motion=document.getElementById('m-chk').checked;
+  const btn=document.getElementById('s-btn');
+  btn.disabled=true; btn.textContent='SENDING...';
+  const res=document.getElementById('sim-res');
   try{
-    const r = await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:temp,gas_value:gas,motion})});
-    const d = await r.json();
-    res.className = `sim-result ${d.risk_level}`;
-    res.textContent = d.risk_level==='safe'?'✅ SAFE — Within normal parameters':d.risk_level==='warning'?`⚠️ WARNING — ${d.reason}`:`🚨 DANGER — ${d.reason}`;
+    const r=await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:temp,gas_value:gas,motion})});
+    const d=await r.json();
+    res.className=`sim-result ${d.risk_level}`;
+    res.textContent=d.risk_level==='safe'?'✅ SAFE — Within normal parameters':d.risk_level==='warning'?`⚠️ WARNING — ${d.reason}`:`🚨 DANGER — ${d.reason}`;
   }catch(_){
-    res.className = 'sim-result warning';
-    res.textContent = '⚠️ Cannot reach server — is FastAPI running?';
+    res.className='sim-result warning';
+    res.textContent='⚠️ Cannot reach server — is FastAPI running?';
   }
-  btn.disabled = false; btn.textContent = '▶ SEND READING';
+  btn.disabled=false; btn.textContent='▶ SEND READING';
 }
 
 async function resetSim(){
-  document.getElementById('t-slider').value = 28;
-  document.getElementById('g-slider').value = 400;
-  document.getElementById('m-chk').checked  = false;
-  document.getElementById('td').textContent  = '28 °C';
-  document.getElementById('gd').textContent  = '400 ppm';
-  document.getElementById('md').textContent  = 'NO MOTION';
-  document.getElementById('sim-res').className = 'sim-result';
+  document.getElementById('t-slider').value=28;
+  document.getElementById('g-slider').value=400;
+  document.getElementById('m-chk').checked=false;
+  document.getElementById('td').textContent='28 °C';
+  document.getElementById('gd').textContent='400 ppm';
+  document.getElementById('md').textContent='NO MOTION';
+  document.getElementById('sim-res').className='sim-result';
   try{ await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:28,gas_value:400,motion:false})}); }catch(_){}
 }
 
-/* ── BOOT ── */
 fetchLatest();
 openWS(1); openWS(2); openWS(3);
 </script>
