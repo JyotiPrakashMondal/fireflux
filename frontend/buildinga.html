@@ -11,105 +11,178 @@
 :root{
   --bg:#060a0f;--panel:#0a1220;--border:#1a2a3a;
   --safe:#00ff88;--warning:#ffaa00;--danger:#ff2244;
-  --text:#c8d8e8;--dim:#5f7f9f;--accent:#0088ff;
+  --text:#c8d8e8;--dim:#4a6a8a;--accent:#0088ff;
   --mono:'Share Tech Mono',monospace;
   --ui:'Rajdhani',sans-serif;
   --display:'Orbitron',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--ui);
-  min-height:100vh;
-  padding:20px;
+  background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;
 }
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,136,255,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,136,255,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;
+}
+
+/* HEADER */
 header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid var(--border);
-  padding-bottom:18px;
-  margin-bottom:25px;
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;background:rgba(6,10,15,.95);border-bottom:1px solid var(--border);
 }
-h1{
-  font-family:var(--display);
-  color:#ff4455;
-  letter-spacing:4px;
+.header-left{display:flex;align-items:center;gap:16px}
+.back-btn{
+  color:var(--dim);text-decoration:none;font-family:var(--mono);
+  font-size:11px;letter-spacing:1px;padding:6px 12px;
+  border:1px solid var(--border);border-radius:2px;transition:all .2s;
 }
-.sub{
-  font-family:var(--mono);
-  font-size:11px;
-  color:var(--dim);
-  letter-spacing:2px;
+.back-btn:hover{color:var(--accent);border-color:rgba(0,136,255,.4)}
+.page-title{font-family:var(--display);font-size:16px;font-weight:700;letter-spacing:3px}
+.page-title span{color:var(--dim);font-size:11px;display:block;letter-spacing:2px;margin-top:2px}
+.live-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);
+  padding:6px 14px;border-radius:2px;
+  font-family:var(--mono);font-size:11px;color:var(--safe);letter-spacing:2px;
 }
-.back{
-  text-decoration:none;
-  color:var(--accent);
-  border:1px solid rgba(0,136,255,.4);
-  padding:9px 14px;
-  font-family:var(--display);
-  font-size:10px;
+.live-dot{width:6px;height:6px;background:var(--safe);border-radius:50%;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ALERT BANNER */
+#alert-banner{
+  position:relative;z-index:10;padding:12px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:14px;font-weight:600;letter-spacing:1px;
+  transition:all .5s ease;border-bottom:1px solid var(--border);
 }
-.floor{
-  background:rgba(10,18,32,.95);
-  border:1px solid var(--border);
-  padding:25px;
-  border-radius:8px;
+#alert-banner.safe{background:rgba(0,255,136,.06);color:var(--safe)}
+#alert-banner.warning{background:rgba(255,170,0,.08);color:var(--warning);animation:wpulse 2s infinite}
+#alert-banner.danger{background:rgba(255,34,68,.10);color:var(--danger);animation:dpulse 1s infinite}
+@keyframes wpulse{0%,100%{background:rgba(255,170,0,.06)}50%{background:rgba(255,170,0,.14)}}
+@keyframes dpulse{0%,100%{background:rgba(255,34,68,.08)}50%{background:rgba(255,34,68,.18)}}
+
+/* CONTENT */
+.content{position:relative;z-index:1;padding:32px;max-width:1200px;margin:0 auto}
+.floor-section{margin-bottom:32px}
+.floor-label{
+  font-family:var(--display);font-size:11px;letter-spacing:3px;
+  color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:12px;
 }
-.floor-title{
-  font-family:var(--display);
-  letter-spacing:2px;
-  margin-bottom:20px;
+.floor-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.floor-plan{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:20px 24px}
+
+/* EXITS */
+.exits-row{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--border);
 }
-.rooms{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:18px;
+.exits-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px}
+.exit-sign{
+  font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  padding:4px 10px;border-radius:2px;transition:all .3s;
+}
+.exit-sign.safe-exit{background:rgba(0,136,255,.1);border:1px solid rgba(0,136,255,.3);color:var(--accent)}
+.exit-sign.unsafe-exit{background:rgba(255,34,68,.1);border:1px solid rgba(255,34,68,.3);color:var(--danger)}
+
+/* ROOMS GRID */
+.rooms-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+@media(min-width:600px){
+  .rooms-row{grid-template-columns:repeat(6,1fr)}
 }
 .room{
-  text-decoration:none;
-  color:var(--text);
-  background:rgba(255,255,255,.03);
-  border:1px solid var(--border);
-  padding:24px;
-  border-radius:8px;
-  transition:.2s;
-  min-height:180px;
+  border-radius:3px;padding:12px 8px;transition:all .3s ease;
+  text-align:center;min-height:88px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
 }
-.room:hover{
-  transform:translateY(-4px);
-  border-color:var(--accent);
-  background:rgba(0,136,255,.08);
+.room.safe{background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15)}
+.room.warning{background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.3)}
+.room.danger{background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.4);animation:rdanger 1s infinite}
+@keyframes rdanger{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(255,34,68,.3)}}
+.room.clickable{cursor:pointer}
+.room.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.room-number{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:1px}
+.room.safe .room-number{color:var(--safe)}
+.room.warning .room-number{color:var(--warning)}
+.room.danger .room-number{color:var(--danger)}
+.room-status{font-family:var(--mono);font-size:8px;letter-spacing:1px;opacity:.8}
+.room.safe .room-status{color:var(--safe)}
+.room.warning .room-status{color:var(--warning)}
+.room.danger .room-status{color:var(--danger)}
+.room-icon{font-size:14px;margin-bottom:2px}
+
+.corridor{
+  height:24px;margin:10px 0;
+  background:rgba(0,136,255,.04);border:1px solid rgba(0,136,255,.08);
+  border-radius:2px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:3px;
 }
-.room h2{
-  font-family:var(--display);
-  letter-spacing:2px;
-  margin-bottom:12px;
+
+/* EXTINGUISHER ROW */
+.ext-row{
+  display:flex;justify-content:space-between;
+  padding:8px 4px 0;border-top:1px solid var(--border);margin-top:10px;
 }
-.status{
-  display:inline-block;
-  margin-top:15px;
-  color:var(--safe);
-  border:1px solid rgba(0,255,136,.4);
-  padding:5px 12px;
-  font-family:var(--mono);
-  font-size:11px;
+.ext-item{
+  display:flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;
 }
-.info{
-  font-family:var(--mono);
-  font-size:12px;
-  color:var(--dim);
-  line-height:1.8;
+
+/* SIMULATOR PANEL */
+.sim-panel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:4px;padding:20px 24px;margin-bottom:18px;
 }
-@media(max-width:768px){
-  body{padding:12px}
-  header{flex-direction:column;align-items:flex-start;gap:14px}
-  .rooms{grid-template-columns:1fr}
+.sim-panel h3{font-family:var(--display);font-size:13px;letter-spacing:2px;margin-bottom:14px;color:var(--text)}
+.sim-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  background:rgba(0,136,255,.15);border:1px solid rgba(0,136,255,.35);
+  color:var(--accent);padding:9px 16px;border-radius:3px;
+  font-family:var(--display);font-size:10px;cursor:pointer;letter-spacing:1px;
+  transition:all .2s;
+}
+.btn:hover{background:rgba(0,136,255,.25)}
+.btn.danger-btn{background:rgba(255,34,68,.14);border-color:rgba(255,34,68,.35);color:var(--danger)}
+.btn.danger-btn:hover{background:rgba(255,34,68,.25)}
+
+/* ALERTS TABLE */
+.alerts-panel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:4px;padding:20px 24px;margin-bottom:18px;
+}
+.alerts-panel h3{font-family:var(--display);font-size:13px;letter-spacing:2px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}
+th{color:var(--accent)}
+
+/* MAPS */
+.maps-section{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:4px;padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.maps-info h3{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:4px}
+.maps-info p{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.maps-btn{
+  display:flex;align-items:center;gap:8px;padding:10px 20px;
+  background:rgba(0,136,255,.12);border:1px solid rgba(0,136,255,.3);
+  color:var(--accent);text-decoration:none;
+  font-family:var(--display);font-size:10px;letter-spacing:2px;
+  border-radius:2px;transition:all .2s;
+}
+.maps-btn:hover{background:rgba(0,136,255,.22)}
+
+@media(max-width:600px){
+  header{padding:12px 16px;flex-direction:column;align-items:flex-start;gap:12px}
+  .content{padding:16px}
+  .maps-section{flex-direction:column;gap:14px;align-items:flex-start}
 }
 </style>
 </head>
-
 <body>
 
 <script>
@@ -119,51 +192,240 @@ if (!sessionStorage.getItem("fireflux_email")) {
 </script>
 
 <header>
-  <div>
-    <h1>BUILDING A</h1>
-    <div class="sub">ROOM MONITORING DASHBOARD</div>
+  <div class="header-left">
+    <a href="index.html" class="back-btn">← BACK</a>
+    <div class="page-title">BUILDING A <span>IEM CAMPUS — SECTOR V, KOLKATA</span></div>
   </div>
-  <a class="back" href="index.html">← BACK TO MAP</a>
+  <div class="live-pill"><div class="live-dot"></div>LIVE</div>
 </header>
 
-<div class="floor">
-  <div class="floor-title">SELECT ROOM</div>
-
-  <div class="rooms">
-    <a class="room" href="r101.html">
-      <h2>ROOM 1</h2>
-      <div class="info">
-        Lab 101<br>
-        Temperature Sensor<br>
-        Gas / Smoke Sensor<br>
-        Motion Detection
-      </div>
-      <span class="status">OPEN ROOM →</span>
-    </a>
-
-    <a class="room" href="r102.html">
-      <h2>ROOM 2</h2>
-      <div class="info">
-        Lab 102<br>
-        Temperature Sensor<br>
-        Gas / Smoke Sensor<br>
-        Motion Detection
-      </div>
-      <span class="status">OPEN ROOM →</span>
-    </a>
-
-    <a class="room" href="r103.html">
-      <h2>ROOM 3</h2>
-      <div class="info">
-        Lab 103<br>
-        Temperature Sensor<br>
-        Gas / Smoke Sensor<br>
-        Motion Detection
-      </div>
-      <span class="status">OPEN ROOM →</span>
-    </a>
+<div id="alert-banner" class="safe">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="banner-icon">✅</span>
+    <span id="banner-text">Building A — All rooms operational, no threats detected</span>
   </div>
+  <span id="banner-status" style="font-family:var(--display);font-size:10px;letter-spacing:3px">ALL SAFE</span>
 </div>
+
+<div class="content">
+
+  <!-- FLOOR 1 -->
+  <div class="floor-section">
+    <div class="floor-label">FLOOR 1</div>
+    <div class="floor-plan">
+      <div class="exits-row">
+        <span class="exits-label">EXITS:</span>
+        <span class="exit-sign safe-exit" id="exit-north-1">🚪 NORTH EXIT</span>
+        <span class="exit-sign safe-exit">🚪 STAIRWELL A</span>
+      </div>
+      <div class="rooms-row">
+        <!-- Clickable rooms linked to room pages -->
+        <div class="room safe clickable" id="room-101" onclick="location.href='r101.html'">
+          <div class="room-icon">🟢</div>
+          <div class="room-number">101</div>
+          <div class="room-status" id="status-101">LOADING...</div>
+        </div>
+        <div class="room safe clickable" id="room-102" onclick="location.href='r102.html'">
+          <div class="room-icon">🟢</div>
+          <div class="room-number">102</div>
+          <div class="room-status" id="status-102">LOADING...</div>
+        </div>
+        <div class="room safe clickable" id="room-103" onclick="location.href='r103.html'">
+          <div class="room-icon">🟢</div>
+          <div class="room-number">103</div>
+          <div class="room-status" id="status-103">LOADING...</div>
+        </div>
+        <!-- Static rooms (no backend data yet) -->
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">104</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">105</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">106</div><div class="room-status">SAFE</div></div>
+      </div>
+      <div class="corridor">— CORRIDOR —</div>
+      <div class="ext-row">
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOOR 2 -->
+  <div class="floor-section">
+    <div class="floor-label">FLOOR 2</div>
+    <div class="floor-plan">
+      <div class="exits-row">
+        <span class="exits-label">EXITS:</span>
+        <span class="exit-sign safe-exit">🚪 NORTH EXIT</span>
+        <span class="exit-sign safe-exit">🚪 STAIRWELL B</span>
+      </div>
+      <div class="rooms-row">
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">201</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">202</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">203</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">204</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">205</div><div class="room-status">SAFE</div></div>
+        <div class="room safe"><div class="room-icon">🟢</div><div class="room-number">206</div><div class="room-status">SAFE</div></div>
+      </div>
+      <div class="corridor">— CORRIDOR —</div>
+      <div class="ext-row">
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+        <div class="ext-item">🧯 EXTINGUISHER</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULATOR -->
+  <div class="sim-panel">
+    <h3>ROOM 101 SIMULATOR</h3>
+    <div class="sim-buttons">
+      <button class="btn" onclick="sendReading(28,400,false)">SAFE TEST</button>
+      <button class="btn danger-btn" onclick="sendReading(90,400,false)">TEMP DANGER</button>
+      <button class="btn danger-btn" onclick="sendReading(30,2200,false)">GAS DANGER</button>
+    </div>
+  </div>
+
+  <!-- ALERTS TABLE -->
+  <div class="alerts-panel">
+    <h3>LATEST ALERTS</h3>
+    <table>
+      <thead>
+        <tr><th>Room</th><th>Level</th><th>Reason</th></tr>
+      </thead>
+      <tbody id="alertsBody">
+        <tr><td colspan="3">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MAPS -->
+  <div class="maps-section">
+    <div class="maps-info">
+      <h3>🚒 FIRE BRIGADE NAVIGATION</h3>
+      <p>IEM Campus, GN-34/2, Sector V, Bidhannagar, Kolkata — 700091</p>
+    </div>
+    <a href="https://www.google.com/maps/search/IEM+College+Sector+V+Kolkata" target="_blank" class="maps-btn">📍 OPEN IN GOOGLE MAPS</a>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const API = "https://fireflux-1.onrender.com";
+const WS  = "wss://fireflux-1.onrender.com";
+
+// Map backend room_id (1,2,3) → display number (101,102,103)
+const roomMap = {1: 101, 2: 102, 3: 103};
+const roomLevels = {1:"safe", 2:"safe", 3:"safe"};
+const icons = {safe:"🟢", warning:"🟡", danger:"🔴"};
+
+function updateRoom(id, level) {
+  const displayId = roomMap[id];
+  const card   = document.getElementById(`room-${displayId}`);
+  const status = document.getElementById(`status-${displayId}`);
+  if (!card || !status) return;
+  card.className = `room ${level} clickable`;
+  status.textContent = level.toUpperCase();
+  card.querySelector('.room-icon').textContent = icons[level];
+}
+
+function updateBanner(level, reason) {
+  const banner = document.getElementById('alert-banner');
+  document.getElementById('banner-icon').textContent =
+    level === 'safe' ? '✅' : level === 'warning' ? '⚠️' : '🚨';
+  document.getElementById('banner-text').textContent =
+    level === 'safe'
+      ? 'Building A — All rooms operational, no threats detected'
+      : level === 'warning'
+      ? `WARNING in Building A — ${reason || ''}`
+      : `DANGER in Building A — ${reason || ''} — Evacuate immediately`;
+  document.getElementById('banner-status').textContent =
+    level === 'safe' ? 'ALL SAFE' : level.toUpperCase();
+  banner.className = level;
+
+  const northExit = document.getElementById('exit-north-1');
+  if (level === 'danger') {
+    northExit.className = 'exit-sign unsafe-exit';
+    northExit.textContent = '🚫 NORTH EXIT — UNSAFE';
+  } else {
+    northExit.className = 'exit-sign safe-exit';
+    northExit.textContent = '🚪 NORTH EXIT';
+  }
+}
+
+function getWorstLevel() {
+  const vals = Object.values(roomLevels);
+  if (vals.includes('danger'))  return 'danger';
+  if (vals.includes('warning')) return 'warning';
+  return 'safe';
+}
+
+async function loadRooms() {
+  for (let id of [1, 2, 3]) {
+    try {
+      const res  = await fetch(`${API}/rooms/${id}/latest`);
+      const data = await res.json();
+      if (!data.error) {
+        roomLevels[id] = data.risk_level || 'safe';
+        updateRoom(id, roomLevels[id]);
+        updateBanner(getWorstLevel(), data.reason);
+      }
+    } catch(e) {
+      const s = document.getElementById(`status-${roomMap[id]}`);
+      if (s) s.textContent = 'OFFLINE';
+    }
+  }
+}
+
+async function sendReading(temp, gas, motion) {
+  await fetch(`${API}/ingest`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({room_id:1, temperature:temp, gas_value:gas, motion:motion})
+  });
+  setTimeout(loadRooms,   700);
+  setTimeout(loadAlerts,  700);
+}
+
+async function loadAlerts() {
+  try {
+    const res  = await fetch(`${API}/alerts`);
+    const data = await res.json();
+    const body = document.getElementById("alertsBody");
+    body.innerHTML = "";
+    if (!Array.isArray(data) || data.length === 0) {
+      body.innerHTML = `<tr><td colspan="3">No alerts found</td></tr>`;
+      return;
+    }
+    data.slice(-8).reverse().forEach(a => {
+      body.innerHTML += `
+        <tr>
+         <td>${roomMap[a.room_id] ?? a.room_id ?? "--"}</td>
+          <td>${a.risk_level ?? a.level ?? "--"}</td>
+          <td>${a.reason ?? a.message ?? "--"}</td>
+        </tr>`;
+    });
+  } catch(e) {
+    document.getElementById("alertsBody").innerHTML =
+      `<tr><td colspan="3">Could not load alerts</td></tr>`;
+  }
+}
+
+function openWS(id) {
+  const ws = new WebSocket(`${WS}/ws/${id}`);
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    roomLevels[id] = data.risk_level || 'safe';
+    updateRoom(id, roomLevels[id]);
+    updateBanner(getWorstLevel(), data.reason);
+  };
+  ws.onclose = () => setTimeout(() => openWS(id), 3000);
+}
+
+loadRooms();
+loadAlerts();
+openWS(1);
+openWS(2);
+openWS(3);
+setInterval(loadRooms, 5000);
+</script>
 
 </body>
 </html>
