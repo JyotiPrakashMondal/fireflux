@@ -12,9 +12,9 @@ from pydantic import BaseModel
 from fastapi                  import FastAPI, Depends, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors  import CORSMiddleware
 from sqlalchemy.orm           import Session
-from backend.database                 import SessionLocal, engine
-from backend.models                   import Base, Room, SensorReading, RiskAssessment, DangerEvent, Alert
-from backend.schemas                  import SensorReadingInput
+from database                 import SessionLocal, engine
+from models                   import Base, Room, SensorReading, RiskAssessment, DangerEvent, Alert
+from schemas                  import SensorReadingInput
 from typing                   import Dict, List
 from datetime                 import datetime
 
@@ -29,7 +29,7 @@ from datetime                 import datetime
 def load_models() -> Dict[int, object]:
     loaded = {}
     for room_id in [1, 2, 3]:
-        path = f"backend/model_room{room_id}.pkl"
+        path = f"/model_room{room_id}.pkl"
         if os.path.exists(path):
             with open(path, "rb") as f:
                 loaded[room_id] = pickle.load(f)
