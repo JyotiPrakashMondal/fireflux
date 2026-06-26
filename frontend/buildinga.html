@@ -1,324 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FireFlux — Command Center</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    :root {
-      --bg:#060a0f; --panel:#0a1220; --border:#1a2a3a;
-      --safe:#00ff88; --warning:#ffaa00; --danger:#ff2244;
-      --text:#c8d8e8; --dim:#4a6a8a; --accent:#0088ff;
-      --mono:'Share Tech Mono',monospace;
-      --ui:'Rajdhani',sans-serif;
-      --display:'Orbitron',monospace;
-    }
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;overflow:hidden}
-    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,136,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,136,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FireFlux — Building A</title>
 
-    /* HEADER */
-    header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(6,10,15,0.97);border-bottom:1px solid var(--border)}
-    .logo{display:flex;align-items:center;gap:12px}
-    .logo-flame{width:36px;height:36px;background:linear-gradient(135deg,#ff4400,#ff0044);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-size:16px;animation:flame-pulse 2s ease-in-out infinite}
-    @keyframes flame-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,0,0.5)}50%{box-shadow:0 0 0 10px rgba(255,68,0,0)}}
-    .logo h1{font-family:var(--display);font-size:22px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#ff4400,#ff0044);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .logo-sub{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:3px;margin-top:2px}
-    .hdr-right{display:flex;align-items:center;gap:20px}
-    .live-pill{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);padding:6px 14px;border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--safe);letter-spacing:2px}
-    .dot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:blink 1s infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
-    #clock{font-family:var(--mono);font-size:13px;color:var(--dim);letter-spacing:1px}
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
 
-    /* BANNER */
-    #banner{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 32px;border-bottom:1px solid var(--border);font-weight:600;letter-spacing:1px;font-size:14px;transition:all .4s}
-    #banner.safe{background:rgba(0,255,136,0.07);color:var(--safe)}
-    #banner.warning{background:rgba(255,170,0,0.09);color:var(--warning);animation:wpulse 2s infinite}
-    #banner.danger{background:rgba(255,34,68,0.11);color:var(--danger);animation:dpulse 1s infinite}
-    @keyframes wpulse{0%,100%{background:rgba(255,170,0,0.07)}50%{background:rgba(255,170,0,0.16)}}
-    @keyframes dpulse{0%,100%{background:rgba(255,34,68,0.09)}50%{background:rgba(255,34,68,0.2)}}
-    .banner-badge{font-family:var(--display);font-size:10px;letter-spacing:3px;padding:4px 12px;border-radius:2px}
-    #banner.safe .banner-badge{background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.3)}
-    #banner.warning .banner-badge{background:rgba(255,170,0,0.12);border:1px solid rgba(255,170,0,0.3)}
-    #banner.danger .banner-badge{background:rgba(255,34,68,0.18);border:1px solid rgba(255,34,68,0.4)}
-
-    /* LAYOUT */
-    .main{position:relative;z-index:1;display:grid;grid-template-columns:1fr 390px;height:calc(100vh - 108px)}
-    #map{width:100%;height:100%}
-    .leaflet-container{background:#080d12 !important}
-    .leaflet-popup-content-wrapper{background:#0a1220 !important;border:1px solid #1a2a3a !important;border-radius:4px !important;box-shadow:0 8px 32px rgba(0,0,0,.7) !important;color:#c8d8e8 !important}
-    .leaflet-popup-tip{background:#0a1220 !important}
-    .popup-inner{font-family:'Rajdhani',sans-serif;min-width:170px}
-    .popup-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:4px}
-    .popup-addr{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;margin-bottom:12px}
-    .popup-btn{display:block;padding:9px;background:rgba(0,136,255,0.14);border:1px solid rgba(0,136,255,0.35);color:#0088ff;text-align:center;text-decoration:none;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;border-radius:2px;transition:background .2s}
-    .popup-btn:hover{background:rgba(0,136,255,0.26)}
-    .popup-btn.disabled{opacity:.35;pointer-events:none}
-
-    /* SIDEBAR */
-    .sidebar{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;gap:10px;padding:18px;overflow-y:auto}
-    .sidebar::-webkit-scrollbar{width:3px}
-    .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-    .sec-label{font-family:var(--display);font-size:9px;letter-spacing:3px;color:var(--dim);padding-bottom:10px;border-bottom:1px solid var(--border)}
-
-    /* BUILDING CARDS */
-    .bcard{position:relative;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:3px;padding:12px 14px;cursor:pointer;transition:all .2s;padding-left:18px}
-    .bcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;transition:background .3s}
-    .bcard.safe::before{background:var(--safe)}
-    .bcard.warning::before{background:var(--warning)}
-    .bcard.danger::before{background:var(--danger)}
-    .bcard:hover{background:rgba(0,136,255,0.05);border-color:rgba(0,136,255,0.25);transform:translateX(2px)}
-    .bcard.active{background:rgba(0,136,255,0.07);border-color:rgba(0,136,255,0.35)}
-    .bcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
-    .bcard-name{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:1px}
-    .badge{font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:2px 8px;border-radius:2px}
-    .safe .badge{background:rgba(0,255,136,0.1);color:var(--safe);border:1px solid rgba(0,255,136,0.2)}
-    .warning .badge{background:rgba(255,170,0,0.1);color:var(--warning);border:1px solid rgba(255,170,0,0.2)}
-    .danger .badge{background:rgba(255,34,68,0.14);color:var(--danger);border:1px solid rgba(255,34,68,0.3)}
-    .bcard-addr{font-family:var(--mono);font-size:10px;color:#6a8aaa;margin-top:2px}
-    .bcard-chips{display:flex;gap:6px;margin-top:7px}
-    .chip{font-family:var(--mono);font-size:9px;color:var(--dim);background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:2px 7px;border-radius:2px}
-
-    /* SIMULATOR */
-    .sim-wrap{background:rgba(0,136,255,0.04);border:1px solid rgba(0,136,255,0.18);border-radius:4px;padding:16px}
-    .sim-head{font-family:var(--display);font-size:10px;letter-spacing:3px;color:var(--accent);display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(0,136,255,0.12);margin-bottom:14px}
-    .sim-tag{font-size:8px;padding:2px 7px;background:rgba(0,136,255,0.14);border:1px solid rgba(0,136,255,0.3);border-radius:2px;color:var(--accent)}
-    .sim-row{margin-bottom:13px}
-    .sim-lbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:6px}
-    .sim-lbl span{color:var(--text)}
-    input[type=range]{width:100%;height:4px;-webkit-appearance:none;background:rgba(255,255,255,0.08);border-radius:2px;outline:none;cursor:pointer}
-    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;cursor:pointer}
-    #t-slider::-webkit-slider-thumb{background:#ff8844}
-    #g-slider::-webkit-slider-thumb{background:#44aaff}
-    .toggle-row{display:flex;align-items:center;gap:10px;margin-top:5px}
-    .tgl{position:relative;width:38px;height:19px;cursor:pointer;flex-shrink:0}
-    .tgl input{opacity:0;width:0;height:0}
-    .tgl-track{position:absolute;inset:0;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;transition:all .3s}
-    .tgl-thumb{position:absolute;top:3px;left:3px;width:11px;height:11px;background:var(--dim);border-radius:50%;transition:all .3s}
-    .tgl input:checked+.tgl-track{background:rgba(255,170,0,0.18);border-color:rgba(255,170,0,0.4)}
-    .tgl input:checked+.tgl-track+.tgl-thumb{background:var(--warning);transform:translateX(19px)}
-    .tgl-lbl{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px}
-    .tgl-lbl em{color:var(--text);font-style:normal}
-    .sim-result{font-family:var(--mono);font-size:10px;padding:8px 10px;border-radius:3px;margin-bottom:10px;text-align:center;letter-spacing:1px;display:none}
-    .sim-result.safe,.sim-result.warning,.sim-result.danger{display:block}
-    .sim-result.safe{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.2);color:var(--safe)}
-    .sim-result.warning{background:rgba(255,170,0,0.07);border:1px solid rgba(255,170,0,0.2);color:var(--warning)}
-    .sim-result.danger{background:rgba(255,34,68,0.09);border:1px solid rgba(255,34,68,0.25);color:var(--danger)}
-    .sim-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .sbtn{padding:9px 6px;font-family:var(--display);font-size:9px;letter-spacing:1px;border-radius:3px;cursor:pointer;border:1px solid;transition:all .2s;text-align:center}
-    .sbtn-send{background:rgba(0,136,255,0.14);border-color:rgba(0,136,255,0.35);color:var(--accent)}
-    .sbtn-send:hover:not(:disabled){background:rgba(0,136,255,0.24)}
-    .sbtn-send:disabled{opacity:.4;cursor:not-allowed}
-    .sbtn-reset{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.22);color:var(--safe)}
-    .sbtn-reset:hover{background:rgba(0,255,136,0.13)}
-  </style>
+<style>
+:root{
+  --bg:#060a0f;--panel:#0a1220;--border:#1a2a3a;
+  --safe:#00ff88;--warning:#ffaa00;--danger:#ff2244;
+  --text:#c8d8e8;--dim:#5f7f9f;--accent:#0088ff;
+  --mono:'Share Tech Mono',monospace;
+  --ui:'Rajdhani',sans-serif;
+  --display:'Orbitron',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--ui);
+  min-height:100vh;
+  padding:20px;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+  padding-bottom:18px;
+  margin-bottom:25px;
+}
+h1{
+  font-family:var(--display);
+  color:#ff4455;
+  letter-spacing:4px;
+}
+.sub{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--dim);
+  letter-spacing:2px;
+}
+.back{
+  text-decoration:none;
+  color:var(--accent);
+  border:1px solid rgba(0,136,255,.4);
+  padding:9px 14px;
+  font-family:var(--display);
+  font-size:10px;
+}
+.floor{
+  background:rgba(10,18,32,.95);
+  border:1px solid var(--border);
+  padding:25px;
+  border-radius:8px;
+}
+.floor-title{
+  font-family:var(--display);
+  letter-spacing:2px;
+  margin-bottom:20px;
+}
+.rooms{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+.room{
+  text-decoration:none;
+  color:var(--text);
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  padding:24px;
+  border-radius:8px;
+  transition:.2s;
+  min-height:180px;
+}
+.room:hover{
+  transform:translateY(-4px);
+  border-color:var(--accent);
+  background:rgba(0,136,255,.08);
+}
+.room h2{
+  font-family:var(--display);
+  letter-spacing:2px;
+  margin-bottom:12px;
+}
+.status{
+  display:inline-block;
+  margin-top:15px;
+  color:var(--safe);
+  border:1px solid rgba(0,255,136,.4);
+  padding:5px 12px;
+  font-family:var(--mono);
+  font-size:11px;
+}
+.info{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--dim);
+  line-height:1.8;
+}
+@media(max-width:768px){
+  body{padding:12px}
+  header{flex-direction:column;align-items:flex-start;gap:14px}
+  .rooms{grid-template-columns:1fr}
+}
+</style>
 </head>
-<body>
-<!-- LOGIN EMAIL START -->
-<script>
-  if (!sessionStorage.getItem("fireflux_email")) {
-    window.location.href = "login.html";
-  }
-</script>
-<!-- LOGIN EMAIL END -->
 
+<body>
+
+<script>
+if (!sessionStorage.getItem("fireflux_email")) {
+  window.location.href = "login.html";
+}
+</script>
 
 <header>
-  <div class="logo">
-    <div class="logo-flame">🔥</div>
-    <div>
-      <h1>FIREFLUX</h1>
-      <div class="logo-sub">REAL-TIME FIRE DETECTION & RESPONSE SYSTEM</div>
-    </div>
+  <div>
+    <h1>BUILDING A</h1>
+    <div class="sub">ROOM MONITORING DASHBOARD</div>
   </div>
-  <div class="hdr-right">
-    <div class="live-pill"><div class="dot"></div>LIVE MONITORING</div>
-    <div id="clock">--:--:--</div>
-  </div>
+  <a class="back" href="index.html">← BACK TO MAP</a>
 </header>
 
-<div id="banner" class="safe">
-  <div style="display:flex;align-items:center;gap:10px">
-    <span id="b-icon">✅</span>
-    <span id="b-text">All systems operational — No threats detected</span>
-  </div>
-  <span class="banner-badge" id="b-badge">ALL SAFE</span>
-</div>
+<div class="floor">
+  <div class="floor-title">SELECT ROOM</div>
 
-<div class="main">
-  <div id="map"></div>
-
-  <div class="sidebar">
-
-    <!-- SIMULATOR -->
-    <div class="sim-wrap">
-      <div class="sim-head">🔬 LAB 101 SIMULATOR <span class="sim-tag">BLDG A · ROOM 1</span></div>
-      <div class="sim-row">
-        <div class="sim-lbl">🌡 TEMPERATURE <span id="td">28 °C</span></div>
-        <input type="range" id="t-slider" min="20" max="150" value="28" oninput="sVal('t',this.value)"/>
+  <div class="rooms">
+    <a class="room" href="r101.html">
+      <h2>ROOM 1</h2>
+      <div class="info">
+        Lab 101<br>
+        Temperature Sensor<br>
+        Gas / Smoke Sensor<br>
+        Motion Detection
       </div>
-      <div class="sim-row">
-        <div class="sim-lbl">💨 GAS / SMOKE <span id="gd">400 ppm</span></div>
-        <input type="range" id="g-slider" min="100" max="3000" value="400" oninput="sVal('g',this.value)"/>
-      </div>
-      <div class="sim-row">
-        <div class="sim-lbl">👁 MOTION DETECTION</div>
-        <div class="toggle-row">
-          <label class="tgl">
-            <input type="checkbox" id="m-chk" onchange="mLbl()"/>
-            <div class="tgl-track"></div><div class="tgl-thumb"></div>
-          </label>
-          <span class="tgl-lbl">Status: <em id="md">NO MOTION</em></span>
-        </div>
-      </div>
-      <div class="sim-result" id="sim-res"></div>
-      <div class="sim-btns">
-        <button class="sbtn sbtn-send" id="s-btn" onclick="sendSim()">▶ SEND READING</button>
-        <button class="sbtn sbtn-reset" onclick="resetSim()">↺ RESET SAFE</button>
-      </div>
-    </div>
+      <span class="status">OPEN ROOM →</span>
+    </a>
 
-    <div class="sec-label">MONITORED BUILDINGS</div>
+    <a class="room" href="r102.html">
+      <h2>ROOM 2</h2>
+      <div class="info">
+        Lab 102<br>
+        Temperature Sensor<br>
+        Gas / Smoke Sensor<br>
+        Motion Detection
+      </div>
+      <span class="status">OPEN ROOM →</span>
+    </a>
 
-    <div class="bcard safe active" id="cA" onclick="focusMap('A')">
-      <div class="bcard-top"><span class="bcard-name">BUILDING A</span><span class="badge" id="bA-badge">SAFE</span></div>
-      <div class="bcard-addr">IEM Campus, Sector V</div>
-      <div class="bcard-chips"><span class="chip">3 SENSORS</span><span class="chip" style="color:var(--safe);border-color:rgba(0,255,136,0.3)">LIVE</span></div>
-    </div>
-    <div class="bcard safe" onclick="focusMap('B')"><div class="bcard-top"><span class="bcard-name">BUILDING B</span><span class="badge">SAFE</span></div><div class="bcard-addr">Technopolis, BP Block</div><div class="bcard-chips"><span class="chip">12 SENSORS</span></div></div>
-    <div class="bcard safe" onclick="focusMap('C')"><div class="bcard-top"><span class="bcard-name">BUILDING C</span><span class="badge">SAFE</span></div><div class="bcard-addr">IBM BCS, EP Block</div><div class="bcard-chips"><span class="chip">8 SENSORS</span></div></div>
-    <div class="bcard safe" onclick="focusMap('D')"><div class="bcard-top"><span class="bcard-name">BUILDING D</span><span class="badge">SAFE</span></div><div class="bcard-addr">Primarc Tower, DN Block</div><div class="bcard-chips"><span class="chip">6 SENSORS</span></div></div>
-    <div class="bcard safe" onclick="focusMap('E')"><div class="bcard-top"><span class="bcard-name">BUILDING E</span><span class="badge">SAFE</span></div><div class="bcard-addr">Webel Bhavan, Sector V</div><div class="bcard-chips"><span class="chip">5 SENSORS</span></div></div>
-    <div class="bcard safe" onclick="focusMap('F')"><div class="bcard-top"><span class="bcard-name">BUILDING F</span><span class="badge">SAFE</span></div><div class="bcard-addr">Wipro Campus, Sector V</div><div class="bcard-chips"><span class="chip">9 SENSORS</span></div></div>
-
+    <a class="room" href="r103.html">
+      <h2>ROOM 3</h2>
+      <div class="info">
+        Lab 103<br>
+        Temperature Sensor<br>
+        Gas / Smoke Sensor<br>
+        Motion Detection
+      </div>
+      <span class="status">OPEN ROOM →</span>
+    </a>
   </div>
 </div>
 
-<script>
-/* ── BACKEND CONFIG ── */
-const API = "https://fireflux-1.onrender.com";
-const WS  = "wss://fireflux-1.onrender.com";
-
-/* ── CLOCK ── */
-setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
-
-/* ── MAP ── */
-const BLDGS = {
-  A:{ lat:22.5701, lng:88.4297, addr:'IEM Campus, Sector V',    url:'buildinga.html', live:true  },
-  B:{ lat:22.5797, lng:88.4377, addr:'Technopolis, BP Block',   url:null,             live:false },
-  C:{ lat:22.5720, lng:88.4344, addr:'IBM BCS, EP Block',       url:null,             live:false },
-  D:{ lat:22.5756, lng:88.4326, addr:'Primarc Tower, DN Block', url:null,             live:false },
-  E:{ lat:22.5740, lng:88.4290, addr:'Webel Bhavan, Sector V',  url:null,             live:false },
-  F:{ lat:22.5768, lng:88.4358, addr:'Wipro Campus, Sector V',  url:null,             live:false }
-};
-
-const map = L.map('map',{center:[22.574,88.433],zoom:15});
-setTimeout(()=>map.invalidateSize(),300);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©OpenStreetMap ©CARTO',maxZoom:19}).addTo(map);
-
-const MARKERS = {};
-function mkIcon(s){
-  const C={safe:{bg:'rgba(0,255,136,0.22)',b:'#00ff88',sh:'rgba(0,255,136,0.5)'},warning:{bg:'rgba(255,170,0,0.22)',b:'#ffaa00',sh:'rgba(255,170,0,0.5)'},danger:{bg:'rgba(255,34,68,0.28)',b:'#ff2244',sh:'rgba(255,34,68,0.7)'}}[s]||{bg:'rgba(0,255,136,0.22)',b:'#00ff88',sh:'rgba(0,255,136,0.5)'};
-  return L.divIcon({className:'',html:`<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${C.bg};border:2px solid ${C.b};box-shadow:0 0 10px ${C.sh}"></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-28]});
-}
-Object.entries(BLDGS).forEach(([k,b])=>{
-  const m = L.marker([b.lat,b.lng],{icon:mkIcon('safe')}).addTo(map);
-  const btn = b.live
-    ? `<a href="${b.url}" class="popup-btn">VIEW BUILDING →</a>`
-    : `<a class="popup-btn disabled">NO LIVE DATA</a>`;
-  m.bindPopup(`<div class="popup-inner"><div class="popup-title">BUILDING ${k}</div><div class="popup-addr">${b.addr}</div>${btn}</div>`);
-  MARKERS[k] = m;
-});
-
-function focusMap(k){ map.setView([BLDGS[k].lat,BLDGS[k].lng],17,{animate:true}); MARKERS[k].openPopup(); }
-
-/* ── RISK STATE ── */
-const roomLvl = {1:'safe',2:'safe',3:'safe'};
-function worst(){ const v=Object.values(roomLvl); return v.includes('danger')?'danger':v.includes('warning')?'warning':'safe'; }
-
-function setBanner(lvl, reason){
-  const b = document.getElementById('banner');
-  b.className = lvl;
-  document.getElementById('b-icon').textContent  = lvl==='safe'?'✅':lvl==='warning'?'⚠️':'🚨';
-  document.getElementById('b-text').textContent  = lvl==='safe'
-    ? 'All systems operational — No threats detected'
-    : lvl==='warning'
-    ? `WARNING in Building A — ${reason}`
-    : `DANGER in Building A — ${reason} — Fire brigade notified`;
-  document.getElementById('b-badge').textContent = lvl==='safe'?'ALL SAFE':lvl.toUpperCase();
-
-  const cA = document.getElementById('cA');
-  cA.className = `bcard ${lvl} active`;
-  document.getElementById('bA-badge').textContent = lvl.toUpperCase();
-  MARKERS['A'].setIcon(mkIcon(lvl));
-}
-
-/* ── WEBSOCKET ── */
-function openWS(roomId){
-  const ws = new WebSocket(`${WS}/ws/${roomId}`);
-  ws.onmessage = e => {
-    const d = JSON.parse(e.data);
-    roomLvl[roomId] = d.risk_level;
-    setBanner(worst(), d.reason);
-  };
-  ws.onclose = () => setTimeout(()=>openWS(roomId), 3000);
-}
-
-/* ── INITIAL FETCH ── */
-async function fetchLatest(){
-  for(const id of [1,2,3]){
-    try{
-      const r = await fetch(`${API}/rooms/${id}/latest`);
-      if(!r.ok) continue;
-      const d = await r.json();
-      if(d.error) continue;
-      roomLvl[id] = d.risk_level;
-    }catch(_){}
-  }
-  setBanner(worst(),'');
-}
-
-/* ── SIMULATOR ── */
-function sVal(t,v){ t==='t' ? (document.getElementById('td').textContent=`${v} °C`) : (document.getElementById('gd').textContent=`${v} ppm`); }
-function mLbl(){ document.getElementById('md').textContent = document.getElementById('m-chk').checked?'DETECTED':'NO MOTION'; }
-
-async function sendSim(){
-  const temp   = parseFloat(document.getElementById('t-slider').value);
-  const gas    = parseFloat(document.getElementById('g-slider').value);
-  const motion = document.getElementById('m-chk').checked;
-  const btn    = document.getElementById('s-btn');
-  btn.disabled = true; btn.textContent = 'SENDING...';
-  const res = document.getElementById('sim-res');
-  try{
-    const r = await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:temp,gas_value:gas,motion})});
-    const d = await r.json();
-    res.className = `sim-result ${d.risk_level}`;
-    res.textContent = d.risk_level==='safe'?'✅ SAFE — Within normal parameters':d.risk_level==='warning'?`⚠️ WARNING — ${d.reason}`:`🚨 DANGER — ${d.reason}`;
-  }catch(_){
-    res.className = 'sim-result warning';
-    res.textContent = '⚠️ Cannot reach server — is FastAPI running?';
-  }
-  btn.disabled = false; btn.textContent = '▶ SEND READING';
-}
-
-async function resetSim(){
-  document.getElementById('t-slider').value = 28;
-  document.getElementById('g-slider').value = 400;
-  document.getElementById('m-chk').checked  = false;
-  document.getElementById('td').textContent  = '28 °C';
-  document.getElementById('gd').textContent  = '400 ppm';
-  document.getElementById('md').textContent  = 'NO MOTION';
-  document.getElementById('sim-res').className = 'sim-result';
-  try{ await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:28,gas_value:400,motion:false})}); }catch(_){}
-}
-
-/* ── BOOT ── */
-fetchLatest();
-openWS(1); openWS(2); openWS(3);
-</script>
 </body>
 </html>
