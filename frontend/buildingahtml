@@ -208,7 +208,7 @@ setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLo
 
 /* ── MAP ── */
 const BLDGS = {
-  A:{ lat:22.5701, lng:88.4297, addr:'IEM Campus, Sector V',    url:'buildingA.html', live:true  },
+  A:{ lat:22.5701, lng:88.4297, addr:'IEM Campus, Sector V',    url:'buildinga.html', live:true  },
   B:{ lat:22.5797, lng:88.4377, addr:'Technopolis, BP Block',   url:null,             live:false },
   C:{ lat:22.5720, lng:88.4344, addr:'IBM BCS, EP Block',       url:null,             live:false },
   D:{ lat:22.5756, lng:88.4326, addr:'Primarc Tower, DN Block', url:null,             live:false },
