@@ -221,8 +221,8 @@
 
 <script>
 /* ── BACKEND CONFIG ── */
-const API     = "http://10.63.176.231:8000";
-const WS_URL  = "ws://10.63.176.231:8000";
+const API     = "http://10.88.180.231:8000";
+const WS_URL  = "ws://10.88.180.231:8000";
 const ROOM_ID = 1;
 
 /* ── CLOCK ── */
@@ -315,7 +315,7 @@ function updateUI(d){
 function showOffline(){
   document.getElementById('offline-bar').style.display = 'block';
   document.getElementById('risk-lvl').textContent   = 'OFFLINE';
-  document.getElementById('risk-reason').textContent = 'Cannot reach FastAPI server at 10.63.176.231:8000';
+  document.getElementById('risk-reason').textContent = 'Cannot reach FastAPI server at 10.88.180.231:8000';
   document.getElementById('ai-text').textContent     = 'Server unavailable. Check that uvicorn is running.';
 }
 

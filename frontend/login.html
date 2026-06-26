@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FireFlux — Login Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#060a0f; --panel:#0a1220; --border:#1a2a3a;
+      --safe:#00ff88; --warning:#ffaa00; --danger:#ff2244;
+      --text:#c8d8e8; --dim:#4a6a8a; --accent:#0088ff;
+      --mono:'Share Tech Mono',monospace;
+      --ui:'Rajdhani',sans-serif;
+      --display:'Orbitron',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,136,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,136,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+    .card{position:relative;z-index:1;width:100%;max-width:430px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.55)}
+    .flame{width:54px;height:54px;margin:0 auto 16px;background:linear-gradient(135deg,#ff4400,#ff0044);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-size:24px}
+    h1{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:4px;text-align:center;background:linear-gradient(90deg,#ff4400,#ff0044);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+    .sub{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;text-align:center;margin-bottom:26px;line-height:1.6}
+    label{display:block;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:8px}
+    input{width:100%;padding:13px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;margin-bottom:14px}
+    input:focus{border-color:rgba(0,136,255,0.5);box-shadow:0 0 0 2px rgba(0,136,255,0.08)}
+    button{width:100%;padding:13px;background:rgba(0,136,255,0.14);border:1px solid rgba(0,136,255,0.35);color:var(--accent);font-family:var(--display);font-size:10px;letter-spacing:2px;border-radius:3px;cursor:pointer;transition:all .2s}
+    button:hover{background:rgba(0,136,255,0.24)}
+    .msg{font-family:var(--mono);font-size:10px;text-align:center;margin-top:14px;min-height:16px;color:var(--warning)}
+    .note{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.6;margin-top:18px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="flame">🔥</div>
+    <h1>FIREFLUX</h1>
+    <div class="sub">ENTER EMAIL TO RECEIVE TEMPORARY DANGER ALERTS</div>
+
+    <!-- LOGIN EMAIL START -->
+    <label for="email">EMAIL ADDRESS</label>
+    <input type="email" id="email" placeholder="example@gmail.com" autocomplete="email"/>
+    <button onclick="registerEmail()">CONTINUE TO DASHBOARD</button>
+    <div class="msg" id="msg"></div>
+    <!-- LOGIN EMAIL END -->
+
+    <div class="note">This email is stored temporarily in backend memory. When the FastAPI server restarts, the backend email list becomes empty.</div>
+  </div>
+
+  <!-- LOGIN EMAIL START -->
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function registerEmail(){
+      const email = document.getElementById('email').value.trim();
+      const msg = document.getElementById('msg');
+
+      if(!email){
+        msg.textContent = 'Please enter an email';
+        return;
+      }
+
+      try{
+        const r = await fetch(`${API}/register-email`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({email: email})
+        });
+
+        const d = await r.json();
+
+        if(d.success){
+          sessionStorage.setItem('fireflux_email', email);
+          window.location.href = 'index.html';
+        }else{
+          msg.textContent = d.message || 'Email registration failed';
+        }
+      }catch(e){
+        msg.textContent = 'Cannot reach FastAPI server';
+      }
+    }
+
+    document.getElementById('email').addEventListener('keydown', function(e){
+      if(e.key === 'Enter') registerEmail();
+    });
+  </script>
+  <!-- LOGIN EMAIL END -->
+</body>
+</html>

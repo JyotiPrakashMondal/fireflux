@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FireFlux — Room 102</title>
+  <title>FireFlux — Room 103</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -100,7 +100,7 @@
   <div class="hdr-l">
     <a href="buildingA.html" class="back">← BUILDING A</a>
     <div>
-      <div class="pg-title">ROOM 102</div>
+      <div class="pg-title">ROOM 103</div>
       <div class="pg-sub">FLOOR 1 · BUILDING A · SIMULATED DATA</div>
     </div>
   </div>
@@ -157,7 +157,7 @@
     <div class="panel-title">🏢 ROOM INFORMATION</div>
     <div style="margin-bottom:18px">
       <div class="info-lbl">LOCATION</div>
-      <div class="info-val">Room 102 — Floor 1</div>
+      <div class="info-val">Room 103 — Floor 1</div>
       <div class="info-sub">Building A, IEM Campus, Sector V, Kolkata</div>
       <div class="equip">🧯 Fire Extinguisher — Present<br/>🚿 Sprinkler System — Active<br/>⚙️ Data Source — Python Simulation Script</div>
     </div>
@@ -191,9 +191,9 @@
 
 <script>
 /* ── BACKEND CONFIG ── */
-const API     = "http://10.63.176.231:8000";
-const WS_URL  = "ws://10.63.176.231:8000";
-const ROOM_ID = 2;
+const API     = "http://10.88.180.231:8000";
+const WS_URL  = "ws://10.88.180.231:8000";
+const ROOM_ID = 3;
 
 setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
 
@@ -255,9 +255,9 @@ function updateUI(d){
   else{ en.className='exit-card ok'; en.textContent='🚪 NORTH EXIT'; }
 
   document.getElementById('ai-text').textContent = lvl==='danger'
-    ? `🚨 CRITICAL: ${d.reason}. Evacuate Room 102 immediately. Use Stairwell A only.`
+    ? `🚨 CRITICAL: ${d.reason}. Evacuate Room 103 immediately. Use Stairwell A only.`
     : lvl==='warning'
-    ? `⚠️ WARNING: ${d.reason}. Elevated readings detected in Room 102. Monitor closely.`
+    ? `⚠️ WARNING: ${d.reason}. Elevated readings detected in Room 103. Monitor closely.`
     : `✅ All clear. Temperature ${temp.toFixed(1)}°C and gas ${gas.toFixed(0)} ppm within safe limits.`;
 }
 

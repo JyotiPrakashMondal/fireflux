@@ -118,6 +118,14 @@
   </style>
 </head>
 <body>
+<!-- LOGIN EMAIL START -->
+<script>
+  if (!sessionStorage.getItem("fireflux_email")) {
+    window.location.href = "login.html";
+  }
+</script>
+<!-- LOGIN EMAIL END -->
+
 
 <header>
   <div class="logo">
@@ -192,8 +200,8 @@
 
 <script>
 /* ── BACKEND CONFIG ── */
-const API = "http://10.63.176.231:8000";
-const WS  = "ws://10.63.176.231:8000";
+const API = "http://127.0.0.1:8000";
+const WS  = "ws://127.0.0.1:8000";
 
 /* ── CLOCK ── */
 setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
