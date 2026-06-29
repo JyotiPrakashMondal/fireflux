@@ -325,7 +325,7 @@ async def process_sensor_data(data: SensorReadingInput, db: Session) -> dict:
             db.commit()
 
             # LOGIN EMAIL START
-            send_danger_email(data.room_id, reason)
+           # send_danger_email(data.room_id, reason)
             # LOGIN EMAIL END
     else:
         # Close any open event if situation has resolved
