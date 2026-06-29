@@ -26,10 +26,15 @@ from datetime                 import datetime
 # If a model file doesn't exist yet, that room falls back to
 # pure IS 2189 rule-based classification — no crash, no problem.
 
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_models() -> Dict[int, object]:
     loaded = {}
+
     for room_id in [1, 2, 3]:
-        path = f"backend/model_room{room_id}.pkl"
+        path = os.path.join(BASE_DIR, f"model_room{room_id}.pkl")
         if os.path.exists(path):
             with open(path, "rb") as f:
                 loaded[room_id] = pickle.load(f)
