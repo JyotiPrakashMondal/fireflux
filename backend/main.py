@@ -29,7 +29,7 @@ from datetime                 import datetime
 def load_models() -> Dict[int, object]:
     loaded = {}
     for room_id in [1, 2, 3]:
-        path = f"/model_room{room_id}.pkl"
+        path = f"backend/model_room{room_id}.pkl"
         if os.path.exists(path):
             with open(path, "rb") as f:
                 loaded[room_id] = pickle.load(f)
