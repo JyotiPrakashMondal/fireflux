@@ -471,7 +471,7 @@ def get_model_status():
         f"room_{room_id}": {
             "ml_loaded" : models.get(room_id) is not None,
             "model_file": f"model_room{room_id}.pkl",
-            "file_exists": os.path.exists(f"model_room{room_id}.pkl"),
+            "file_exists": os.path.exists(os.path.join(BASE_DIR,f"model_room{room_id}.pkl")),
         }
         for room_id in [1, 2, 3]
     }
