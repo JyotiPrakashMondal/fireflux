@@ -219,9 +219,7 @@ manager = ConnectionManager()
 
 def assess_risk(temperature: float, gas_value: float, motion: bool, room_id: int):
 
-    # ── Step 1: IS 2189 hard danger limits ──────────────────
-    # These thresholds are non-negotiable regardless of ML.
-    # Based on Indian Standard IS 2189 for fire alarm systems.
+    # Step 1: Danger rule for all rooms
     if gas_value >= 2000 or temperature >= 78:
         reasons = []
         if gas_value >= 2000:
@@ -230,42 +228,40 @@ def assess_risk(temperature: float, gas_value: float, motion: bool, room_id: int
             reasons.append("Temperature critically high")
         return 0.9, "danger", ", ".join(reasons)
 
-    # ── Step 2: ML anomaly detection ────────────────────────
+    # Step 2: If ML model exists, use ML for safe/warning
     model = models.get(room_id)
 
     if model is not None:
-        X     = np.array([[temperature, gas_value]])
+        X = np.array([[temperature, gas_value]])
         score = model.decision_function(X)[0]
-        # decision_function returns a score:
-        #   positive  →  normal  (far from anomaly boundary)
-        #   near zero →  borderline
-        #   negative  →  anomalous (unusual compared to training data)
 
+        # ML says normal
         if score > -0.05:
-            # Pattern looks normal to the model
+            # But physical value is elevated, so warning
+            if gas_value >= 1000 or temperature >= 57:
+                reasons = []
+                if gas_value >= 1000:
+                    reasons.append("Gas elevated")
+                if temperature >= 57:
+                    reasons.append("Temperature elevated")
+                return 0.5, "warning", ", ".join(reasons)
+
             return 0.0, "safe", "All readings normal"
 
-        # Model flagged this reading as anomalous.
-        # But we still check physical values before raising alarm —
-        # ML can flag sensor noise or a cold morning as "unusual".
+        # ML says unusual
         if temperature <= 45 and gas_value <= 1000:
-            # Values are physically low — this is sensor noise, not fire
             return 0.0, "safe", "All readings normal"
 
-        # Anomalous AND values are elevated → real warning
         reasons = []
         if gas_value >= 1000:
             reasons.append("Gas elevated")
         if temperature >= 57:
             reasons.append("Temperature elevated")
-        reason = ", ".join(reasons) if reasons else "Unusual pattern detected by ML"
 
-        # risk_score is the absolute anomaly score, capped at 0.8
-        # (0.9 is reserved for IS 2189 danger threshold)
-       # risk_score = min(float(round(abs(score), 2)), 0.8)
+        reason = ", ".join(reasons) if reasons else "Unusual pattern detected by ML"
         return 0.5, "warning", reason
 
-    # ── Step 3: No ML model — IS 2189 warning thresholds ────
+    # Step 3: If no ML model, use rule-based warning/safe
     if gas_value >= 1000 or temperature >= 57:
         reasons = []
         if gas_value >= 1000:
@@ -274,8 +270,8 @@ def assess_risk(temperature: float, gas_value: float, motion: bool, room_id: int
             reasons.append("Temperature elevated")
         return 0.5, "warning", ", ".join(reasons)
 
-    # ── Step 4: All clear ────────────────────────────────────
     return 0.0, "safe", "All readings normal"
+    
 
 
 # ============================================================
