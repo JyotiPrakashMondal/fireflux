@@ -381,7 +381,7 @@ async def ingest(data: SensorReadingInput, db: Session = Depends(get_db)):
 # ROUTES — QUERY
 # ============================================================
 
-@app.get("/rooms")
+@app.api_route("/rooms", methods=["GET", "HEAD"])
 def get_rooms(db: Session = Depends(get_db)):
     """List all rooms."""
     return db.query(Room).all()
