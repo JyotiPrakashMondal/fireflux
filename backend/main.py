@@ -157,7 +157,7 @@ def register_email(data: EmailRegister):
 
 
 #@app.get("/registered-emails")
-@app.api_route("/register-email", methods=["GET", "HEAD"])
+@app.api_route("/registered-emails", methods=["GET", "HEAD"])
 def get_registered_emails():
     return {"total_emails": len(registered_emails), "emails": registered_emails}
 # LOGIN EMAIL END
