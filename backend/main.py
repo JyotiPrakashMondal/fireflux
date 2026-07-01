@@ -323,7 +323,7 @@ async def process_sensor_data(data: SensorReadingInput, db: Session) -> dict:
             db.refresh(open_event)  # need the auto-generated id for the Alert below
 
             # LOGIN EMAIL START
-           # send_danger_email(data.room_id, reason)
+            send_danger_email(data.room_id, reason)
             # LOGIN EMAIL END
 
         # Log an alert for this danger reading — this is what powers the
