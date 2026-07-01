@@ -393,7 +393,7 @@ async def ingest(data: SensorReadingInput, db: Session = Depends(get_db)):
 # ROUTES — QUERY
 # ============================================================
 
-@app.api_route("/rooms", methods=["GET", "HEAD"])
+@app.get("/rooms")
 def get_rooms(db: Session = Depends(get_db)):
     """List all rooms."""
     return db.query(Room).all()
@@ -416,14 +416,21 @@ def get_latest(room_id: int, db: Session = Depends(get_db)):
     if not reading:
         return {"error": "No data yet"}
 
+    # risk_score used to be hardcoded to 0.0 here regardless of risk_level,
+    # which is why the risk ring showed "0.0" even during a DANGER reading
+    # (this endpoint is what powers the room page on initial load, before
+    # the WebSocket sends a live update with the real score).
+    level = assessment.risk_level if assessment else "safe"
+    score_map = {"danger": 0.9, "warning": 0.5, "safe": 0.0}
+
     return {
         "room_id"    : room_id,
         "temperature": reading.temperature,
         "gas_value"  : reading.gas_value,
         "motion"     : reading.motion,
-        "risk_score" : 0.0,
-        "risk_level" : assessment.risk_level if assessment else "safe",
-        "reason"     : assessment.reason     if assessment else "No assessment yet",
+        "risk_score" : score_map.get(level, 0.0),
+        "risk_level" : level,
+        "reason"     : assessment.reason if assessment else "No assessment yet",
         "ml_active"  : models.get(room_id) is not None,
         "timestamp"  : reading.recorded_at.isoformat(),
     }
