@@ -138,7 +138,8 @@ def get_db():
 
 
 # LOGIN EMAIL START
-@app.post("/register-email")
+#@app.post("/register-email")
+@app.api_route("/register-email", methods=["POST", "HEAD"])
 def register_email(data: EmailRegister):
     email = data.email.strip().lower()
 
@@ -156,7 +157,7 @@ def register_email(data: EmailRegister):
 
 
 
-@app.api_route("/registered-emails", methods=["GET", "HEAD"])
+@app.get("/registered-emails")
 def get_registered_emails():
     return {"total_emails": len(registered_emails), "emails": registered_emails}
 # LOGIN EMAIL END
