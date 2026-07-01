@@ -223,7 +223,7 @@
   <div class="sidebar">
 
     <div class="sim-wrap">
-      <div class="sim-head">🔬 LAB 101 SIMULATOR <span class="sim-tag">BLDG A · ROOM 1</span></div>
+      <div class="sim-head">🔬 ROOM SIMULATOR <span class="sim-tag" id="sim-room-tag">BLDG A · ROOM —</span></div>
       <div class="sim-row">
         <div class="sim-lbl">🌡 TEMPERATURE <span id="td">28 °C</span></div>
         <input type="range" id="t-slider" min="20" max="150" value="28" oninput="sVal('t',this.value)"/>
@@ -305,6 +305,7 @@ function focusMap(k){
 }
 
 const roomLvl = {1:'safe',2:'safe',3:'safe'};
+const ROOM_DISPLAY = {1:101,2:102,3:103};
 function worst(){ const v=Object.values(roomLvl); return v.includes('danger')?'danger':v.includes('warning')?'warning':'safe'; }
 
 function setBanner(lvl, reason){
@@ -356,11 +357,27 @@ async function sendSim(){
   const btn=document.getElementById('s-btn');
   btn.disabled=true; btn.textContent='SENDING...';
   const res=document.getElementById('sim-res');
+
+  // pick a random room — 1 (101), 2 (102), or 3 (103)
+  const targetRoom = [1,2,3][Math.floor(Math.random()*3)];
+  document.getElementById('sim-room-tag').textContent = `BLDG A · ROOM ${ROOM_DISPLAY[targetRoom]}`;
+
   try{
-    const r=await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:temp,gas_value:gas,motion})});
+    const r=await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:targetRoom,temperature:temp,gas_value:gas,motion})});
     const d=await r.json();
+
+    // update the targeted room with the real reading...
+    roomLvl[targetRoom]=d.risk_level;
+    // ...and reset the other two rooms back to safe so only one room is "live" at a time
+    [1,2,3].filter(id=>id!==targetRoom).forEach(id=>{ roomLvl[id]='safe'; });
+    setBanner(worst(), d.reason);
+
     res.className=`sim-result ${d.risk_level}`;
-    res.textContent=d.risk_level==='safe'?'✅ SAFE — Within normal parameters':d.risk_level==='warning'?`⚠️ WARNING — ${d.reason}`:`🚨 DANGER — ${d.reason}`;
+    res.textContent=d.risk_level==='safe'
+      ? `✅ SAFE — Room ${ROOM_DISPLAY[targetRoom]} within normal parameters`
+      : d.risk_level==='warning'
+      ? `⚠️ WARNING — Room ${ROOM_DISPLAY[targetRoom]} — ${d.reason}`
+      : `🚨 DANGER — Room ${ROOM_DISPLAY[targetRoom]} — ${d.reason}`;
   }catch(_){
     res.className='sim-result warning';
     res.textContent='⚠️ Cannot reach server — is FastAPI running?';
@@ -376,7 +393,16 @@ async function resetSim(){
   document.getElementById('gd').textContent='400 ppm';
   document.getElementById('md').textContent='NO MOTION';
   document.getElementById('sim-res').className='sim-result';
-  try{ await fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:1,temperature:28,gas_value:400,motion:false})}); }catch(_){}
+  document.getElementById('sim-room-tag').textContent='BLDG A · ROOM —';
+
+  // reset all three rooms to safe, locally and on the backend
+  [1,2,3].forEach(id=>{ roomLvl[id]='safe'; });
+  setBanner(worst(), '');
+  try{
+    await Promise.all([1,2,3].map(id=>
+      fetch(`${API}/ingest`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:id,temperature:28,gas_value:400,motion:false})})
+    ));
+  }catch(_){}
 }
 
 fetchLatest();

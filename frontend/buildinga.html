@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+         <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -132,23 +133,6 @@ header{
   font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;
 }
 
-/* SIMULATOR PANEL */
-.sim-panel{
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:4px;padding:20px 24px;margin-bottom:18px;
-}
-.sim-panel h3{font-family:var(--display);font-size:13px;letter-spacing:2px;margin-bottom:14px;color:var(--text)}
-.sim-buttons{display:flex;gap:8px;flex-wrap:wrap}
-.btn{
-  background:rgba(0,136,255,.15);border:1px solid rgba(0,136,255,.35);
-  color:var(--accent);padding:9px 16px;border-radius:3px;
-  font-family:var(--display);font-size:10px;cursor:pointer;letter-spacing:1px;
-  transition:all .2s;
-}
-.btn:hover{background:rgba(0,136,255,.25)}
-.btn.danger-btn{background:rgba(255,34,68,.14);border-color:rgba(255,34,68,.35);color:var(--danger)}
-.btn.danger-btn:hover{background:rgba(255,34,68,.25)}
-
 /* ALERTS TABLE */
 .alerts-panel{
   background:var(--panel);border:1px solid var(--border);
@@ -273,16 +257,6 @@ if (!sessionStorage.getItem("fireflux_email")) {
     </div>
   </div>
 
-  <!-- SIMULATOR -->
-  <div class="sim-panel">
-    <h3>ROOM 101 SIMULATOR</h3>
-    <div class="sim-buttons">
-      <button class="btn" onclick="sendReading(28,400,false)">SAFE TEST</button>
-      <button class="btn danger-btn" onclick="sendReading(90,400,false)">TEMP DANGER</button>
-      <button class="btn danger-btn" onclick="sendReading(30,2200,false)">GAS DANGER</button>
-    </div>
-  </div>
-
   <!-- ALERTS TABLE -->
   <div class="alerts-panel">
     <h3>LATEST ALERTS</h3>
@@ -374,16 +348,6 @@ async function loadRooms() {
   }
 }
 
-async function sendReading(temp, gas, motion) {
-  await fetch(`${API}/ingest`, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({room_id:1, temperature:temp, gas_value:gas, motion:motion})
-  });
-  setTimeout(loadRooms,   700);
-  setTimeout(loadAlerts,  700);
-}
-
 async function loadAlerts() {
   try {
     const res  = await fetch(`${API}/alerts`);
@@ -395,11 +359,16 @@ async function loadAlerts() {
       return;
     }
     data.slice(-8).reverse().forEach(a => {
+      // Alert rows only have a "message" field, formatted as "LEVEL: reason"
+      const raw = a.message ?? a.reason ?? "--";
+      const sep = raw.indexOf(": ");
+      const level  = sep !== -1 ? raw.slice(0, sep)      : "--";
+      const reason = sep !== -1 ? raw.slice(sep + 2)     : raw;
       body.innerHTML += `
         <tr>
          <td>${roomMap[a.room_id] ?? a.room_id ?? "--"}</td>
-          <td>${a.risk_level ?? a.level ?? "--"}</td>
-          <td>${a.reason ?? a.message ?? "--"}</td>
+          <td>${level}</td>
+          <td>${reason}</td>
         </tr>`;
     });
   } catch(e) {
@@ -425,6 +394,7 @@ openWS(1);
 openWS(2);
 openWS(3);
 setInterval(loadRooms, 5000);
+setInterval(loadAlerts, 5000);
 </script>
 
 </body>

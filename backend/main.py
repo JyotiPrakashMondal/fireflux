@@ -317,12 +317,24 @@ async def process_sensor_data(data: SensorReadingInput, db: Session) -> dict:
             DangerEvent.ended_at == None,
         ).first()
         if not open_event:
-            db.add(DangerEvent(room_id=data.room_id, trigger=reason))
+            open_event = DangerEvent(room_id=data.room_id, trigger=reason)
+            db.add(open_event)
             db.commit()
+            db.refresh(open_event)  # need the auto-generated id for the Alert below
 
             # LOGIN EMAIL START
            # send_danger_email(data.room_id, reason)
             # LOGIN EMAIL END
+
+        # Log an alert for this danger reading — this is what powers the
+        # "Latest Alerts" table on the frontend. Previously nothing ever
+        # wrote to the alerts table, so /alerts always came back empty.
+        db.add(Alert(
+            room_id  = data.room_id,
+            event_id = open_event.id,
+            message  = f"DANGER: {reason}",
+        ))
+        db.commit()
     else:
         # Close any open event if situation has resolved
         open_event = db.query(DangerEvent).filter(
