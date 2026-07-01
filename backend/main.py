@@ -138,7 +138,7 @@ def get_db():
 
 
 # LOGIN EMAIL START
-@app.post("/register-email")
+@api_route("/register-email", methods=["GET", "HEAD"])
 def register_email(data: EmailRegister):
     email = data.email.strip().lower()
 
